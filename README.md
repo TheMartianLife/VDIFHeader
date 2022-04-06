@@ -1,4 +1,4 @@
-<img align="right" width="220" src="docs/logo.png" style="padding:10px;">
+<img align="right" src="docs/logo.png" style="padding:10px;width:30%;max-width:220px;min-width:100px;">
 
 # VDIF Header
 A simple Python library for parsing and validating the format and values of **VDIF**[^1] headers in radio telescope data files.
@@ -12,7 +12,7 @@ A simple Python library for parsing and validating the format and values of **VD
 When imported as a package, users have access to two main functions:
 
 * `get_first_header(input_filepath)` - function returns the first header in the provided file as a `VDIFHeader` object.
-* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, either as a generator (e.g. `for h in get_headers(input_filepath)` or as a list of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour to parse is all headers in file.
+* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, either as a generator (e.g. `for h in get_headers(input_filepath)` or as a list of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse is all headers in file.
 
 ```python
 import vdifheader
