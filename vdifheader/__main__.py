@@ -2,7 +2,6 @@ from os import path
 from sys import argv
 from enum import EnumMeta
 
-from vdifheader.__utils__ import _warn, _error, _print
 from vdifheader.__init__ import *
 
 class _VDIFPrintMode(EnumMeta):
@@ -15,7 +14,7 @@ class _VDIFPrintMode(EnumMeta):
         try:
             return super().__getitem__(name)
         except (KeyError) as error:
-            _warn(f"{name} invalid for print_mode, defaulting to SUMMARY.")
+            vdifh_warn(f"{name} invalid for print_mode, defaulting to SUMMARY.")
             return _VDIFPrintMode.SUMMARY
 
 def main():
@@ -23,6 +22,10 @@ def main():
     if 'show_help' in args:
         __show_help()
         exit(0)
+    elif 'input_filepath' not in args:
+        # nothing we can do then (shrug)
+        __show_usage()
+        return
 
     num_headers = args['num_headers']
     print_mode = args['print_mode']
@@ -55,10 +58,10 @@ def main():
 def __parse_args(args):
     parsed_args = { # default values
         'num_headers': -1,
-        'print_mode': _VDIFPrintMode.SUMMARY
+        'print_mode': _VDIFPrintMode.SUMMARY,
+        'invalid': []
     }
     value_field = ''
-    show_usage = False
     for arg in args:
         if arg == '-h' or args == '--help':
             parsed_args['show_help'] = True
@@ -77,7 +80,8 @@ def __parse_args(args):
             try:
                 num_headers = int(arg)
             except ValueError:
-                _warn(f"{arg} invalid for num_headers, defaulting to --all.")
+                parsed_args['invalid'].append(arg)
+                vdifh_warn(f"{arg} invalid for num_headers, defaulting to --all.")
                 num_headers = -1
             parsed_args['num_headers'] = num_headers
         elif value_field == 'print_mode':
@@ -86,33 +90,30 @@ def __parse_args(args):
         elif arg == args[-1] and value_field == '':
             parsed_args['input_filepath'] = arg
         else:
-            _warn("{arg} is invalid arg.")
-            show_usage = True
+            parsed_args['invalid'].append(arg)
+            vdifh_warn("{arg} is invalid arg.")
         value_field = ''
+    # if we get to here without a valid input_filepath
     if not 'input_filepath' in parsed_args:
-        _error(f"no input_file provided.")
-        __show_usage()
-        exit(-1)
+        vdifh_error(f"no input_filepath provided.")
     elif not path.isfile(parsed_args['input_filepath']):
-        _error(f"{parsed_args['input_filepath']} is not a file.")
-        exit(-1)
-    elif show_usage: 
-        __show_usage()
+        vdifh_error(f"{parsed_args['input_filepath']} is not a file.")
+        del parsed_args['input_filepath']
     return parsed_args
 
 def __show_usage():
-    _print('usage: vdifheader [options] [file]')
+    vdifh_print('usage: vdifheader [options] [file]')
     return
 
 def __show_help():
     __show_usage()
-    _print('  options:')
-    _print('    -h, --help\t\tshow help')
-    _print('    -n --count [number]\tnumber of headers to parse (default=1)')
-    _print('    -a --all\t\tparse all headers in file')
-    _print('    -v --verbose\tshow all output')
-    _print('    -s --silent\t\tshow minimal output')
-    _print('    -p --print [mode]\tlevel of output to show' \
+    vdifh_print('  options:')
+    vdifh_print('    -h, --help\t\tshow help')
+    vdifh_print('    -n --count [number]\tnumber of headers to parse (default=1)')
+    vdifh_print('    -a --all\t\tparse all headers in file')
+    vdifh_print('    -v --verbose\tshow all output')
+    vdifh_print('    -s --silent\t\tshow minimal output')
+    vdifh_print('    -p --print [mode]\tlevel of output to show' \
         '{none|summary|values|raw|verbose}')
     return
 
