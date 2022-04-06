@@ -1,4 +1,4 @@
-<img align="right" width="240" src="docs/logo.png" style="padding:10px;">
+<img align="right" width="220" src="docs/logo.png" style="padding:10px;">
 
 # VDIF Header
 A simple Python library for parsing and validating the format and values of **VDIF**[^1] headers in radio telescope data files.
@@ -11,23 +11,25 @@ A simple Python library for parsing and validating the format and values of **VD
 
 When imported as a package, users have access to two main functions:
 
-* `get_first_header(filepath)`{:.python} - function returns the first header in the provided file as a `VDIFHeader` object.
-* `get_headers(filepath, count=None)`{:.python} - generator function returns the first `count` headers in the provided file, either as a generator (e.g. `for h in get_headers(filepath)`{:.python}) or as a list of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour to parse is all headers in file.
+* `get_first_header(filepath)`input_filepath' - function returns the first header in the provided file as a `VDIFHeader` object.
+* `get_headers(filepath, count=None)`input_filepath' - generator function returns the first `count` headers in the provided file, either as a generator (e.g. `for h in get_headers(filepath)`input_filepath') or as a list of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour to parse is all headers in file.
 
 ```python
 import vdifheader
 
 intput_filepath = './some_input_file.vdif'
 headers = get_headers(input_filepath, count=5)
-print(f"Parsed {len(headers)} starting at {headers[0].get_timestamp()}")
+timestamp = headers[0].get_timestamp()
+print(f"Parsed {len(headers)} starting at {timestamp}")
 ```
 
 **As a Script**
 
 When run as a script, simply specify a file to validate and any additional configuration options. Options include:
 
-* show usage/ help
+* show usage/help
 * parse only a certain number of headers
+* show output in a certain format
 
 ```
 % python -m vdifheader -h
@@ -38,7 +40,7 @@ usage: vdifheader [options] [file]
     -a --all		parse all headers in file
     -v --verbose	show all output
     -s --silent		show minimal output
-    -p --print [mode]	level of output to show{none|summary|values|raw|verbose}
+    -p --print [mode]	level of output to show {none|summary|values|raw|verbose}
 %
 % python -m vdifheader some_input_file.vdif
 WARNING: synch code field contains incorrect value (header 2).
@@ -50,12 +52,14 @@ WARNING: synch code field contains incorrect value (header 3).
 
 When passing `-i` to the Python interpreter, the provided script will run but leave the interpreter open afterwards for the user to continue the session with variable memory and declarations intact. In this mode, after completion of the script, the following values will be set:
 
-* `first_header`{:.python} - the first header parsed from the provided file.
-* `headers`{:.python} - an array of all headers parsed from the provided file.
+* `first_header`input_filepath' - the first header parsed from the provided file.
+* `headers`input_filepath' - an array of all headers parsed from the provided file.
 
 ```
 % python -m vdifheader --count 5 some_input_file.vdif
-<same output from above>
+WARNING: synch code field contains incorrect value (header 2).
+WARNING: synch code field contains incorrect value (header 3).
+0 errors, 2 warnings generated.
 >>> first_header.station_id
 Hb
 >>> len(headers)
