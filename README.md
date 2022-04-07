@@ -15,7 +15,7 @@ A simple Python library for parsing and validating the format and values of **VD
 When imported as a package, users have access to two main functions:
 
 * `get_first_header(input_filepath)` - function returns the first header in the provided file as a `VDIFHeader` object.
-* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, as a **generator** of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse is all headers in file. 
+* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, as a **generator** of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse all headers found in the file. 
 
 Each `VDIFHeader` object is populated with `VDIFHeaderField` objects that hold the `value` and `validity` for each contained property. Validity is always `VALID`, `INVALID` or `UNKNOWN`.
 
