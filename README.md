@@ -15,7 +15,9 @@ A simple Python library for parsing and validating the format and values of **VD
 When imported as a package, users have access to two main functions:
 
 * `get_first_header(input_filepath)` - function returns the first header in the provided file as a `VDIFHeader` object.
-* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, as a **generator** of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse is all headers in file.
+* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, as a **generator** of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse is all headers in file. 
+
+Each `VDIFHeader` object is populated with `VDIFHeaderField` objects that hold the `value` and `validity` for each contained property. Validity is always `VALID`, `INVALID` or `UNKNOWN`.
 
 ```python
 import vdifheader as vh
@@ -26,6 +28,7 @@ for header in headers:
 headers_list = list(headers)
 timestamp = headers_list[0].get_timestamp()
 print(f"Parsed {len(headers_list)} starting at {timestamp}")
+station = headers_list[0].station_id.value
 ```
 
 ### As a Script
@@ -75,7 +78,7 @@ For detailed usage information, see the [vdifheader documentation](/docs).
 
 ## Dependencies
 
-The only required dependencies are within the Python standard library except for one optional dependency: `colorama`. If installed, this package enabled colored debug output.
+The only required dependencies are within the Python standard library except for one optional dependency: `colorama`. If installed, this package enables colored debug output.
 
 <p align="center">
 <img src="docs/screenshot.png" style="padding:10px;width:80%;">
