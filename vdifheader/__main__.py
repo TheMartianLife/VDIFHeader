@@ -123,8 +123,10 @@ def __parse_args(args):
                 num_headers = int(arg)
             except ValueError:
                 parsed_args["invalid"].append(f"-n {arg}")
-                stderr.write(f"WARNING: arg {arg} invalid for num_headers. " \
-                    "Defaulting to all.\n")
+                stderr.write(
+                    f"WARNING: arg {arg} invalid for num_headers. "
+                    "Defaulting to all.\n"
+                )
                 num_headers = -1
             parsed_args["num_headers"] = num_headers
             value_field = ""
@@ -134,8 +136,8 @@ def __parse_args(args):
             except KeyError:
                 parsed_args["invalid"].append(f"-p {arg}")
                 stderr.write(
-                    f"WARNING: arg '{arg}' invalid for print_mode. " \
-                        "Defaulting to 'summary'.\n"
+                    f"WARNING: arg '{arg}' invalid for print_mode. "
+                    "Defaulting to 'summary'.\n"
                 )
                 print_mode = _VDIFPrintMode.SUMMARY
             parsed_args["print_mode"] = print_mode
@@ -144,8 +146,10 @@ def __parse_args(args):
             parsed_args["input_filepath"] = arg
         else:
             parsed_args["invalid"].append(arg)
-            stderr.write(f"WARNING: arg {arg} is invalid arg for position. "\
-                "Ignoring arg.\n")
+            stderr.write(
+                f"WARNING: arg {arg} is invalid arg for position. " \
+                "Ignoring arg.\n"
+            )
     # if we get to here without a valid input_filepath
     if not "input_filepath" in parsed_args:
         stderr.write(f"ERROR: no input_filepath provided.\n")
@@ -178,4 +182,3 @@ def __show_help():
 
 if __name__ == "__main__":
     main()
-    

@@ -15,10 +15,9 @@ When imported as a package, users have access to two main functions:
 * `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, as a **generator** of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse is all headers in file.
 
 ```python
-import vdifheader
-
-intput_filepath = './some_input_file.vdif'
-headers = get_headers(input_filepath, count=5)
+import vdifheader as vh
+input_filepath = './some_input_file.vdif'
+headers = vh.get_headers(input_filepath, count=5)
 for header in headers:
     print(header.print_values())
 headers_list = list(headers)
@@ -71,6 +70,12 @@ Hb
 
 For detailed usage information, see the [vdifheader documentation](/docs).
 
+## Dependencies
+
+The only required dependencies are within the Python standard library except for one optional dependency: `colorama`. If installed, this package enabled colored debug output.
+
+<center><img align="center" src="docs/screenshot.png" style="padding:10px;width:80%;"></center>
+
 ## License
 
 This project is licensed under the terms of the [GNU General Public License, version 3](https://www.gnu.org/licenses/gpl-3.0.en.html). **This is a [copyleft](https://www.gnu.org/licenses/copyleft.en.html) license.**
@@ -79,3 +84,5 @@ This project is licensed under the terms of the [GNU General Public License, ver
 
 * Handling of Extended Data fields.
 * Ability to change values in `VDIFHeader`, write them back to valid binary header.
+* Output header values to formats such as iniFile/csv/json.
+* Extensible (i.e. define-your-own) field validity constraints.

@@ -27,11 +27,13 @@ __status__ = "Pre-release"
 __version__ = "0.1"
 
 from enum import Enum
-try: # colors if they have them
-   import colorama
-   colorama.init()
-except: # else don't worry about it
-       pass
+
+try:  # colors if they have them
+    import colorama
+
+    colorama.init()
+except:  # else don't worry about it
+    pass
 
 WORD_BITS = 32
 WORD_BYTES = 4
@@ -112,7 +114,7 @@ def header_position(key):
 def convert_station_id(raw):
     char1 = int(raw[0:8], 2)
     char2 = int(raw[8:16], 2)
-    if char2 != 48: # where char2 == ASCII 0x30 means "treat this as int"
+    if char2 != 48:  # where char2 == ASCII 0x30 means "treat this as int"
         return f"{chr(char1)}{chr(char2)}"
     else:
         return f"{int(raw, 2)}"
@@ -122,10 +124,11 @@ def known_station_id(value):
     # TODO better central source of more station codes? these ones are from IVS
     # TODO also consider possible mark4 transformation mangling?
     # e.g. www.atnf.csiro.au/vlbi/dokuwiki/doku.php/difx/difx2mark4/stationcodes
-    known_ids = ['Oh', 'Sy', 'Ag', 'Hb', 'Ho', 'Ke', 'Yg', 'Pa', 'Ft', 'Ur', 
-        'Sh', 'Mh', 'Eb', 'Wz', 'Mc', 'Nt', 'Ma', 'Kb', 'K1', 'Kg', 'Ts', 'Is',
-        'Mn', 'Ww', 'Ny', 'Bd', 'Sv', 'Zc', 'Yb', 'Hh', 'Kv', 'On', 'Sm', 'Gs', 
-        'Gg', 'Wf', 'Kk', 'Mp']
+    known_ids = [
+        "Oh", "Sy", "Ag", "Hb", "Ho", "Ke", "Yg", "Pa", "Ft", "Ur", "Sh", "Mh", 
+        "Eb", "Wz", "Mc", "Nt", "Ma", "Kb", "K1", "Kg", "Ts", "Is", "Mn", "Ww", 
+        "Ny", "Bd", "Sv", "Zc", "Yb", "Hh", "Kv", "On", "Sm", "Gs", "Gg", "Wf", 
+        "Kk", "Mp"]
     return value in known_ids
 
 

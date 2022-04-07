@@ -26,6 +26,7 @@ __maintainer__ = __author__
 __status__ = "Pre-release"
 __version__ = "0.1"
 
+from os import path
 from sys import stderr
 
 from vdifheader.vdifheader import VDIFHeader
@@ -52,7 +53,9 @@ def get_headers(input_filepath, count=None):
     if count is not None and count > 0:
         header_limit = True
     parsed_count = 0
-    with open(input_filepath, "rb") as input_file:
+    # allow relative/home-relative filepaths
+    input_realpath = path.realpath(path.expanduser(input_filepath))
+    with open(input_realpath, "rb") as input_file:
         raw_header = input_file.read(VDIF_HEADER_BYTES)
         # until we find the end of the file, or otherwise break
         while raw_header is not None and len(raw_header) > 0:
@@ -70,5 +73,5 @@ def get_headers(input_filepath, count=None):
             raw_header = input_file.read(VDIF_HEADER_BYTES)
     if header_limit and parsed_count != count:
         stderr.write(
-            f"get_headers found {parsed_count} headers, expected " f"{count}.\n"
+            f"get_headers found {parsed_count} headers, expected {count}.\n"
         )
