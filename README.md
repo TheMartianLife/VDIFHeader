@@ -1,4 +1,4 @@
-<img align="right" width="220" src="docs/logo.png" style="padding:10px;">
+<img align="right" src="docs/logo.png" style="padding:10px;width:20%;">
 
 # VDIF Header
 A simple Python library for parsing and validating the format and values of **VDIF**[^1] headers in radio telescope data files.
@@ -12,15 +12,18 @@ A simple Python library for parsing and validating the format and values of **VD
 When imported as a package, users have access to two main functions:
 
 * `get_first_header(input_filepath)` - function returns the first header in the provided file as a `VDIFHeader` object.
-* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, either as a generator (e.g. `for h in get_headers(input_filepath)` or as a list of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour to parse is all headers in file.
+* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, as a **generator** of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse is all headers in file.
 
 ```python
 import vdifheader
 
 intput_filepath = './some_input_file.vdif'
 headers = get_headers(input_filepath, count=5)
-timestamp = headers[0].get_timestamp()
-print(f"Parsed {len(headers)} starting at {timestamp}")
+for header in headers:
+    print(header.print_values())
+headers_list = list(headers)
+timestamp = headers_list[0].get_timestamp()
+print(f"Parsed {len(headers_list)} starting at {timestamp}")
 ```
 
 ### As a Script
@@ -53,7 +56,7 @@ WARNING: synch code field contains incorrect value (header 3).
 When passing `-i` to the Python interpreter, the provided script will run but leave the interpreter open afterwards for the user to continue the session with variable memory and declarations intact. In this mode, after completion of the script, the following values will be set:
 
 * `first_header` - the first header parsed from the provided file.
-* `headers` - an array of all headers parsed from the provided file.
+* `headers` - a list of all headers parsed from the provided file.
 
 ```
 % python -m vdifheader --count 5 some_input_file.vdif
@@ -71,3 +74,8 @@ For detailed usage information, see the [vdifheader documentation](/docs).
 ## License
 
 This project is licensed under the terms of the [GNU General Public License, version 3](https://www.gnu.org/licenses/gpl-3.0.en.html). **This is a [copyleft](https://www.gnu.org/licenses/copyleft.en.html) license.**
+
+## Planned Improvements
+
+* Handling of Extended Data fields.
+* Ability to change values in `VDIFHeader`, write them back to valid binary header.

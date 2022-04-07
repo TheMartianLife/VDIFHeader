@@ -1,50 +1,44 @@
-from vdifheader.__utils__ import Validity, __validity_color, _DebugColor
+"""
+> vdifheader - vdifheaderfield.py
+Defines VDIFHeaderField class that represents a single field within a VDIFHeader
 
-__WORD_BYTES = 4
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+"""
+__author__ = "Mars Buttfield-Addison"
+__authors__ = [__author__]
+__contact__ = "hello@themartianlife.com"
+__copyright__ = f"Copyright 2022, {__author__}"
+__credits__ = __authors__
+__date__ = "2022/04/07"
+__deprecated__ = False
+__email__ = __contact__
+__license__ = "GPLv3"
+__maintainer__ = __author__
+__status__ = "Pre-release"
+__version__ = "0.1"
+
 
 class VDIFHeaderField:
-    '''A class that represents a single field within a VDIFHeader object'''
+    """A class that represents a single field within a VDIFHeader object"""
 
     ######## PUBLIC FUNCTIONS
 
     def __init__(self, name, value, raw_value, validity):
         self._name = name
         self.value = value
-        self._raw_value = raw_value
-        self._validity = validity
+        self.raw_value = raw_value
+        self.validity = validity
 
     ######## PRIVATE FUNCTIONS
-
-    def __create_for(key, value, raw_value):
-        header_field = VDIFHeaderField(key, value, raw_value, Validity.UNKNOWN)
-        return header_field
-
-    def __set_valid(self, valid=True):
-        self._validity = Validity.VALID if valid else Validity.INVALID
-
-    def __set_valid_nonstrict(self, valid=True):
-        self._validity = Validity.VALID if valid else Validity.UNKNOWN
-
-    def __is_valid(self):
-        return self._validity == Validity.VALID
-
-    def __raw_bits(self):
-        if len(self.raw_value < __WORD_BYTES):
-            # this must be a normal field
-            color = __validity_color(self._validity)
-            bytes = ' '.join(self._raw_value)
-            return f"{color}{bytes}{_DebugColor.NONE}"
-        else:
-            # this must be extended data
-            color = __validity_color(self._validity)
-            start, end = (0, 24)
-            output_string = ""
-            for _ in range(4):
-                byte = ' '.join(self._raw_value[start:end])
-                output_string += f"|{color}{byte}{_DebugColor.NONE}|\n"
-                end = start
-                start += __WORD_BYTES
-            return output_string
 
     def __repr__(self):
         return f"<VDIFHeaderField _name={self._name}, value={self.value}>"
@@ -61,4 +55,5 @@ class VDIFHeaderField:
                 and self._validity == other._validity
             )
         else:
+            # allows e.g. field whose .value is 1 to == 1
             return self.value == other
