@@ -94,6 +94,7 @@ def main():
     if print_mode != _VDIFPrintMode.NONE:
         stdout.write(f"{num_errors} errors, {num_warnings} warnings " \
             "generated.\n")
+    return
 
 
 def __parse_args(args):
@@ -122,8 +123,8 @@ def __parse_args(args):
                 num_headers = int(arg)
             except ValueError:
                 parsed_args["invalid"].append(f"-n {arg}")
-                stderr.write(f"{arg} invalid for num_headers. Defaulting to " \
-                    "all.\n")
+                stderr.write(f"WARNING: arg {arg} invalid for num_headers. " \
+                    "Defaulting to all.\n")
                 num_headers = -1
             parsed_args["num_headers"] = num_headers
             value_field = ""
@@ -133,8 +134,8 @@ def __parse_args(args):
             except KeyError:
                 parsed_args["invalid"].append(f"-p {arg}")
                 stderr.write(
-                    f"'{arg}' invalid for print_mode. Defaulting to " \
-                        "'summary'.\n"
+                    f"WARNING: arg '{arg}' invalid for print_mode. " \
+                        "Defaulting to 'summary'.\n"
                 )
                 print_mode = _VDIFPrintMode.SUMMARY
             parsed_args["print_mode"] = print_mode
@@ -143,12 +144,14 @@ def __parse_args(args):
             parsed_args["input_filepath"] = arg
         else:
             parsed_args["invalid"].append(arg)
-            stderr.write(f"{arg} is invalid arg.\n")
+            stderr.write(f"WARNING: arg {arg} is invalid arg for position. "\
+                "Ignoring arg.\n")
     # if we get to here without a valid input_filepath
     if not "input_filepath" in parsed_args:
-        stderr.write(f"no input_filepath provided.\n")
+        stderr.write(f"ERROR: no input_filepath provided.\n")
     elif not path.isfile(parsed_args["input_filepath"]):
-        stderr.write(f"{parsed_args['input_filepath']} is not a file.\n")
+        stderr.write(f"ERROR: {parsed_args['input_filepath']} is not a " \
+            "file.\n")
         del parsed_args["input_filepath"]
     return parsed_args
 
@@ -175,3 +178,4 @@ def __show_help():
 
 if __name__ == "__main__":
     main()
+    

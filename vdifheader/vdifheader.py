@@ -95,7 +95,7 @@ class VDIFHeader:
         stdout.write(f"Invalid flag: {self.invalid_flag}\n")
         stdout.write(f"Legacy mode: {self.legacy_mode}\n")
         stdout.write(f"Time from epoch: {self.seconds_from_epoch} seconds\n")
-        # stdout.write(f"Reference epoch: {}") # TODO
+        stdout.write(f"Reference epoch: {self.reference_epoch} UTC\n")
         stdout.write(f"Data frame number: {self.data_frame_number}\n")
         stdout.write(f"VDIF version: {self.vdif_version}\n")
         stdout.write(f"Number of channels: {self.num_channels}\n")
@@ -115,15 +115,30 @@ class VDIFHeader:
         for field_name in self.__public_fields()[:-2]:
             if word_bits == 0:
                 output_string += f"Word {word_num} "
+            # get field values and color them as per validity
             field = getattr(self, field_name)
             raw = " ".join(reversed_bits(field.raw_value))
             output_string += f"|{colorify(raw, field.validity)}"
             word_bits += len(field.raw_value)
+            # if at the end of a word, begin a new line
             if word_bits == WORD_BITS:
                 word_num += 1
                 output_string += f"|\n"
                 word_bits = 0
-        # TODO print edv if required
+        if self.legacy_mode.value != True:
+            # print extended data version
+            field = self.extended_data_version
+            edv_raw = " ".join(reversed_bits(field.raw_value))
+            output_string += f"Word 4 |{colorify(edv_raw, field.validity)}"
+            # and then the data itself
+            extended_data = reversed_bits(self.extended_data.raw_value)
+            validity = self.extended_data.validity
+            ed1 = colorify(" ".join(extended_data[0:24]), validity)
+            ed2 = colorify(" ".join(extended_data[24:56]), validity)
+            ed3 = colorify(" ".join(extended_data[56:88]), validity)
+            ed4 = colorify(" ".join(extended_data[88:]), validity)
+            output_string += f"|{ed1}|\nWord 5 |{ed2}|\n"
+            output_string += f"Word 6 |{ed3}|\nWord 7 |{ed4}|\n"
         stdout.write(output_string)
 
     def print_verbose(self):
@@ -211,10 +226,25 @@ class VDIFHeader:
         key = "extended_data"
         raw = header_extended_bits(self.raw_data)
         setattr(self, key, VDIFHeaderField(key, "(mixed data)", raw, unknown))
+        return
 
     def __validate_values(self):
         # TODO all the validation
         return
+
+    def __validate_value(self, field, test_success, validity, message):
+        if test_success:
+            field.validity = Validity.VALID
+        elif not test_success:
+            field.validity = validity
+            if validity == Validity.UNKNOWN:
+                self.warnings.append(message)
+                self.warnings_count += 1
+            elif validity == Validity.INVALID:
+                self.errors.append(message)
+                self.errors_count += 1
+        return
+
 
     def __print_edv_values(self):
         # TODO do that

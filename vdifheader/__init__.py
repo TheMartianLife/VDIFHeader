@@ -55,7 +55,7 @@ def get_headers(input_filepath, count=None):
     with open(input_filepath, "rb") as input_file:
         raw_header = input_file.read(VDIF_HEADER_BYTES)
         # until we find the end of the file, or otherwise break
-        while raw_header is not None:
+        while raw_header is not None and len(raw_header) > 0:
             # parse the fetched raw header bytes
             header = VDIFHeader.parse(raw_header, parsed_count)
             yield header
