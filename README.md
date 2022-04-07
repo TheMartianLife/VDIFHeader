@@ -64,7 +64,7 @@ When passing `-i` to the Python interpreter, the provided script will run but le
 * `headers` - a list of all headers parsed from the provided file.
 
 ```
-% python -m vdifheader --count 5 some_input_file.vdif
+% python -i -m vdifheader --count 5 some_input_file.vdif
 WARNING: synch code field contains incorrect value (header 2).
 WARNING: synch code field contains incorrect value (header 3).
 0 errors, 2 warnings generated.
