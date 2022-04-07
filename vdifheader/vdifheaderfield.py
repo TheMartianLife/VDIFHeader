@@ -26,6 +26,8 @@ __maintainer__ = __author__
 __status__ = "Pre-release"
 __version__ = "0.1"
 
+from vdifheader.__utils__ import Validity
+
 
 class VDIFHeaderField:
     """A class that represents a single field within a VDIFHeader object"""
@@ -37,6 +39,8 @@ class VDIFHeaderField:
         self.value = value
         self.raw_value = raw_value
         self.validity = validity
+        self.__validity_test = None
+        self.__always_valid = False
 
     ######## PRIVATE FUNCTIONS
 
@@ -57,3 +61,30 @@ class VDIFHeaderField:
         else:
             # allows e.g. field whose .value is 1 to == 1
             return self.value == other
+
+    ######## INTERNAL FUNCTIONS
+
+    def _set_validity_test(self, validity_test, validity, message):
+        self.__validity_test = (validity_test, validity, message)
+        return
+
+    def _set_always_valid(self):
+        self.__always_valid = True
+        return
+
+    def _revalidate(self):
+        '''Update validity based on current value versus field constraints'''
+        if self.__always_valid:
+            return (Validity.VALID, None)
+        elif self.__validity_test is None:
+            self.validity = Validity.UNKNOWN
+            default_message = "no known validity test for field {self._name}"
+            return (Validity.UNKNOWN, default_message)
+        validity_test, failure_validity, message = self.__validity_test
+        test_success = validity_test(self.value)
+        if test_success:
+            self.validity = Validity.VALID
+        elif not test_success:
+            self.validity = failure_validity
+        return (self.validity, message)
+    

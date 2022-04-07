@@ -112,7 +112,7 @@ def header_position(key):
 def convert_station_id(raw):
     char1 = int(raw[0:8], 2)
     char2 = int(raw[8:16], 2)
-    if char1 != "0":
+    if char2 != 48: # where char2 == ASCII 0x30 means "treat this as int"
         return f"{chr(char1)}{chr(char2)}"
     else:
         return f"{int(raw, 2)}"
