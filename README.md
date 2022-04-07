@@ -77,7 +77,9 @@ For detailed usage information, see the [vdifheader documentation](/docs).
 
 The only required dependencies are within the Python standard library except for one optional dependency: `colorama`. If installed, this package enabled colored debug output.
 
-<center><img align="center" src="docs/screenshot.png" style="padding:10px;width:80%;"></center>
+<p align="center">
+<img src="docs/screenshot.png" style="padding:10px;width:80%;">
+</p>
 
 ## License
 
