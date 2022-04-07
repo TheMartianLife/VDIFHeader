@@ -2,7 +2,7 @@
 
 # VDIF Header
 
-> :warning: **WARNING**: This project is in a pre-release state and is not yet thoroughly tested. **Use at your own risk.**
+> :warning: **WARNING**: This project is in a pre-release state and has not yet achieved test coverage. **Use at your own risk.**
 > 
 A simple Python library for parsing and validating the format and values of **VDIF**[^1] headers in radio telescope data files.
 
