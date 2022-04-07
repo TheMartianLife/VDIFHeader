@@ -1,6 +1,9 @@
 <img align="right" src="docs/logo.png" style="padding:10px;width:20%;">
 
 # VDIF Header
+
+> :warning: **WARNING**: This project is in a pre-release state and is not yet thoroughly tested. **Use at your own risk.**
+> 
 A simple Python library for parsing and validating the format and values of **VDIF**[^1] headers in radio telescope data files.
 
 [^1]: VLBI Data Interchange Format (source: [vlbi.org](https://vlbi.org/wp-content/uploads/2019/03/VDIF_specification_Release_1.1.1.pdf))
