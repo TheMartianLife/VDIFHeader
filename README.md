@@ -23,7 +23,7 @@ Each `VDIFHeader` object is populated with `VDIFHeaderField` objects that hold t
 
 > :brain: **REMEMBER**: Python generators are very fast for large input, but are consumed if operated on. So if you write `output = some_generator()` and then iterate over `output` (e.g. `for item in output`), the output will now be empty.
 
-[^2]: [Generators](https://wiki.python.org/moin/Generators) in Python are a type of function that *generates* a result, rather than *returns* a result. For operating over potentially large input, this means not waiting for the whole thing to be loaded into memory before starting work.
+[^2]: Generators in Python are a type of function that *generates* a result, rather than *returns* a result. For operating over potentially large input, this means not waiting for the whole thing to be loaded into memory before starting work (see: [wiki.python.org](https://wiki.python.org/moin/Generators)).
 
 ```python
 import vdifheader as vh
@@ -34,7 +34,7 @@ input_filepath = './some_input_file.vdif'
 # get some headers
 headers = vh.get_headers(input_filepath, count=5) # as generator (fast)
 headers_list = list(headers) # as list (sticks around)
-for header in headers:
+for header in headers_list:
     header.print_summary()
 
 # do stuff with a header
