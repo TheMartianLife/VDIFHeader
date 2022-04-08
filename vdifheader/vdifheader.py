@@ -1,17 +1,50 @@
+# > vdifheader - vdifheader.py
+# Defines VDIFHeader class that represents a single header within a VDIF file
+
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <http://www.gnu.org/licenses/>.
 """
 > vdifheader - vdifheader.py
 Defines VDIFHeader class that represents a single header within a VDIF file
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+class VDIFHeader:
+    invalid_flag: VDIFHeaderField
+    legacy_mode: VDIFHeaderField
+    seconds_from_epoch: VDIFHeaderField
+    unassigned_field: VDIFHeaderField
+    reference_epoch: VDIFHeaderField
+    data_frame_number: VDIFHeaderField
+    vdif_version: VDIFHeaderField
+    num_channels: VDIFHeaderField
+    data_frame_length: VDIFHeaderField
+    data_type: VDIFHeaderField
+    bits_per_sample: VDIFHeaderField
+    thread_id: VDIFHeaderField
+    station_id: VDIFHeaderField
+    extended_data_version: VDIFHeaderField
+    extended_data: VDIFHeaderField
+    header_num: Optional[int]
+    warnings: List[str]
+    warnings_count: int
+    errors: List[str]
+    errors_count: int
+    raw_data: Optional[List[str]]
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with
-this program. If not, see <http://www.gnu.org/licenses/>.
+    @staticmethod 
+    parse(raw_data: bytes, header_num: Optional[int]=None) -> VDIFHeader
+    get_timestamp() -> datetime.datetime
+    print_summary()
+    print_raw()
+    print_values()
+    print_verbose()
 """
 __author__ = "Mars Buttfield-Addison"
 __authors__ = [__author__]
