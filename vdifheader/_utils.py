@@ -48,7 +48,7 @@ class Validity(Enum):
     INVALID = 1
     VALID = 2
 
-
+    
 class __DebugColor:
     YELLOW = "\033[0;33m"
     RED = "\033[0;31m"

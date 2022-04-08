@@ -17,20 +17,43 @@ A simple Python library for parsing and validating the format and values of **VD
 When imported as a package, users have access to two main functions:
 
 * `get_first_header(input_filepath)` - function returns the first header in the provided file as a `VDIFHeader` object.
-* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, as a **generator** of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse all headers found in the file. 
+* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, as a **generator**[^2] of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse all headers found in the file. 
 
 Each `VDIFHeader` object is populated with `VDIFHeaderField` objects that hold the `value` and `validity` for each contained property. Validity is always `VALID`, `INVALID` or `UNKNOWN`.
 
+> :brain: **REMEMBER**: Python generators are very fast for large input, but are consumed if operated on. So if you write `output = some_generator()` and then iterate over `output` (e.g. `for item in output`), the output will now be empty.
+
+[^2]: [Generators](https://wiki.python.org/moin/Generators) in Python are a type of function that *generates* a result, rather than *returns* a result. For operating over potentially large input, this means not waiting for the whole thing to be loaded into memory before starting work.
+
 ```python
 import vdifheader as vh
+from vdifheader import Validity
+
 input_filepath = './some_input_file.vdif'
-headers = vh.get_headers(input_filepath, count=5)
+
+# get some headers
+headers = vh.get_headers(input_filepath, count=5) # as generator (fast)
+headers_list = list(headers) # as list (sticks around)
 for header in headers:
-    print(header.print_values())
-headers_list = list(headers)
-timestamp = headers_list[0].get_timestamp()
-print(f"Parsed {len(headers_list)} starting at {timestamp}")
-station = headers_list[0].station_id.value
+    header.print_summary()
+
+# do stuff with a header
+first_header = headers_list[0]
+timestamp = first_header.get_timestamp()
+print(f"\n\nParsed {len(headers_list)} starting at: {timestamp}")
+station = first_header.station_id
+recognised = (station.validity == Validity.VALID)
+print(f"Station ID {station.value} recognised: {recognised}")
+
+# export its values somewhere
+first_header.to_csv(output_filepath='./some_input_file_vdif.csv')
+```
+Output:
+```
+ERROR: reference epoch is in the future (header 4).
+
+Parsed 5 starting at: 2021-09-21 04:20:00+00:00
+Station ID Tt recognised: False
 ```
 
 ### As a Script

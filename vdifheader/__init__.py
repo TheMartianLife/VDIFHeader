@@ -15,6 +15,7 @@
 > vdifheader - __init__.py (private)
 Defines publicly acessible API functions for the vdifheader package
 """
+__all__ = ["vdifheader", "vdifheaderfield"]
 __author__ = "Mars Buttfield-Addison"
 __authors__ = [__author__]
 __contact__ = "hello@themartianlife.com"
@@ -28,12 +29,14 @@ __maintainer__ = __author__
 __status__ = "Pre-release"
 __version__ = "0.1"
 
+
 from os import path
 from sys import stderr
 from typing import Optional
 
 from vdifheader.vdifheader import VDIFHeader
 from vdifheader.vdifheaderfield import VDIFHeaderField
+from vdifheader._utils import Validity
 
 VDIF_HEADER_BYTES = 32
 STATION_ID_FILE = "station_ids.csv"

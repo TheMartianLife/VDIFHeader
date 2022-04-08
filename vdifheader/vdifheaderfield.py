@@ -30,7 +30,7 @@ __version__ = "0.1"
 
 from typing import Callable, Optional, Tuple, Union
 
-from vdifheader.__utils__ import Validity
+from vdifheader._utils import Validity
 
 
 class VDIFHeaderField:

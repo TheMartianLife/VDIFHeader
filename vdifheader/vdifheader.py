@@ -34,7 +34,7 @@ from sys import stderr, stdout
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from vdifheader.__utils__ import *
+from vdifheader._utils import *
 from vdifheader.vdifheaderfield import VDIFHeaderField
 
 CHANNEL_LIMIT = 65536
@@ -141,6 +141,7 @@ class VDIFHeader:
         for error in self.errors:
             message = f"ERROR: {error} (header {self.header_num}).\n"
             stderr.write(colorify(message, Validity.INVALID))
+        return
 
     def print_values(self):
         """Prints key and value for each of the available header fields"""
@@ -158,6 +159,7 @@ class VDIFHeader:
         stdout.write(f"Station ID: {self.station_id}\n")
         stdout.write(f"Extended data version: {self.extended_data_version}\n")
         self.__print_edv_values()
+        return
 
     def print_raw(self):
         """Prints raw binary header values, with coloring for validity"""
@@ -192,6 +194,7 @@ class VDIFHeader:
             output_string += f"|{ed1}|\nWord 5 |{ed2}|\n"
             output_string += f"Word 6 |{ed3}|\nWord 7 |{ed4}|\n"
         stdout.write(output_string)
+        return
 
     def print_verbose(self):
         """Prints a combination of raw, values, and summary output"""
