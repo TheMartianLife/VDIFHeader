@@ -133,6 +133,7 @@ def convert_station_id(raw_id: str) -> str:
 def known_station_id(station_id: str) -> bool:
     """Checks for station id in included list of known ids"""
     # TODO better central source of more station codes? these ones are from IVS
+    # maybe include from e.g. https://ivscc.bkg.bund.de/sessions/stations/
     # TODO also consider possible mark4 transformation mangling?
     # e.g. www.atnf.csiro.au/vlbi/dokuwiki/doku.php/difx/difx2mark4/stationcodes
     known_ids = [

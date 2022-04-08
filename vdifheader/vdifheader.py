@@ -203,23 +203,27 @@ class VDIFHeader:
     def to_dict(self) -> dict[str, Union[bool, int, str]]:
         """Creates dictionary mapping of field names to field values"""
         fields_dict = {}
-        for field_name in self.__public_fields():
+        # get every field except extended data
+        for field_name in self.__public_fields()[:-1]:
             field = getattr(self, field_name)
             value = None if field == EMPTY_FIELD else field.value
             fields_dict[field_name] = value
-        return fields_dict
+        extended_data_dict = self.get_extended_data_dict()
+        return fields_dict | extended_data_dict # combine the two
 
+    
+    def get_extended_data_dict(self) -> dict[str, Union[bool, int, str]]:
+        # TODO implement this
+        return {}
 
     def to_inifile(self, output_filepath: str):
         """Writes file of name=value for each field in header"""
         output_realpath = path.realpath(path.expanduser(output_filepath))
         with open(output_realpath, "w+") as output_file:
-            for field_name in self.__public_fields():
-                field = getattr(self, field_name)
-                value = field.value
-                if type(value) is bool:
-                    value = str(value).lower()
-                output_file.write(f"{field._name}={value}\n")
+            for field_name, field_value in self.to_dict().items():
+                if type(field_value) is bool:
+                    field_value = str(field_value).lower()
+                output_file.write(f"{field_name}={field_value}\n")
         return
 
     def to_csv(self, output_filepath: str):
@@ -227,9 +231,8 @@ class VDIFHeader:
         output_realpath = path.realpath(path.expanduser(output_filepath))
         with open(output_realpath, "w+") as output_file:
             output_file.write("field_name,field_value\n")
-            for field_name in self.__public_fields():
-                field = getattr(self, field_name)
-                output_file.write(f"{field._name},{field.value}\n")
+            for field_name, field_value in self.to_dict().items():
+                output_file.write(f"{field_name},{field_value}\n")
         return
 
     ######## PRIVATE FUNCTIONS
@@ -361,5 +364,5 @@ class VDIFHeader:
 
     def __print_edv_values(self):
         """Prints any known extended data values, for print values output"""
-        # TODO do that
+        # TODO implement this, based on get_extended_data_dict()
         return
