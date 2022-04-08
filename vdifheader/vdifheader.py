@@ -148,7 +148,7 @@ class VDIFHeader:
     def print_verbose(self):
         """Prints a combination of raw, values, and summary output"""
         self.print_raw()
-        self.print_values()
+        #self.print_values()
         self.print_summary()
         return
 
