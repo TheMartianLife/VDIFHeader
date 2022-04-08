@@ -30,7 +30,7 @@ __status__ = "Pre-release"
 __version__ = "0.1"
 
 from enum import Enum
-from typing import List, Tuple, Union
+from typing import Tuple, Union
 
 try:  # colors if they have them
     import colorama
@@ -68,7 +68,7 @@ def colorify(message: str, color: Union[Validity, __DebugColor]):
         return message
 
 
-def switch_endianness(raw_data: bytes) -> List[str]:
+def switch_endianness(raw_data: bytes) -> list[str]:
     """Reverses the bits in each word but retains word order"""
     data = list(raw_data)
     switched_data = []
@@ -80,7 +80,7 @@ def switch_endianness(raw_data: bytes) -> List[str]:
     return switched_data
 
 
-def header_bits(raw_data: List[str], word: int, start_bit: int, 
+def header_bits(raw_data: list[str], word: int, start_bit: int, 
         num_bits: int) -> Tuple[int, str]:
     """Accesses bits within two-dimensional raw data"""
     word_data = reversed_bits(raw_data[word])
@@ -88,7 +88,7 @@ def header_bits(raw_data: List[str], word: int, start_bit: int,
     return (int(bits, 2), bits)
 
 
-def header_extended_bits(raw_data: List[str]) -> str:
+def header_extended_bits(raw_data: list[str]) -> str:
     """Accesses bits 128-255 of raw data, omitting bits 152-159"""
     bits = ""
     for word in range(4, 8):

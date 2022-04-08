@@ -30,7 +30,7 @@ __version__ = "0.1"
 
 from os import path
 from sys import stderr
-from typing import List, Optional
+from typing import Optional
 
 from vdifheader.vdifheader import VDIFHeader
 
@@ -58,7 +58,7 @@ def get_first_header(input_filepath: str) -> Optional[VDIFHeader]:
 
 
 def get_headers(input_filepath: str, 
-        count: Optional[int]=None) -> List[VDIFHeader]:
+        count: Optional[int]=None) -> list[VDIFHeader]:
     """
     Returns list of first count headers from file at input filepath
 
@@ -67,7 +67,7 @@ def get_headers(input_filepath: str,
             count: Optional[int]    number of headers to parse, else parse all
 
         returns:
-           List[VDIFHeader]         header data if found, else empty    
+           list[VDIFHeader]         header data if found, else empty    
     """
     header_limit = False
     # if count is invalid, header_limit is disabled. include all headers in file

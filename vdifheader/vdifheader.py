@@ -62,11 +62,11 @@ class VDIFHeader:
         station_id: VDIFHeaderField
         extended_data_version: VDIFHeaderField
         extended_data: VDIFHeaderField
-        warnings: List[str]
+        warnings: list[str]
         warnings_count: int
-        errors: List[str]
+        errors: list[str]
         errors_count: int
-        raw_data: Optional[List[str]]
+        raw_data: Optional[list[str]]
         header_num: Optional[int]
 
     @staticmethods:
@@ -207,7 +207,7 @@ class VDIFHeader:
         return f"<VDIFHeader station_id={self.station_id},\
             timestamp={self.get_timestamp()}>"
 
-    def __public_fields(self) -> List[str]:
+    def __public_fields(self) -> list[str]:
         """Gets field names, omitting utility fields such as errors count"""
         return ["invalid_flag", "legacy_mode", "seconds_from_epoch",
             "unassigned_field", "reference_epoch", "data_frame_number",
