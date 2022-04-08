@@ -140,7 +140,7 @@ validity: Validity
 
 An `enum` value of type `Validity`, where possible values are `VALID`, `INVALID`, or `UNKNOWN`.
 
-<a name="output-modes"></a>
+<a name="output_modes"></a>
 ## Output Modes
 
 | Option | Description |
