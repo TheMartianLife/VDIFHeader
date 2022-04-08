@@ -95,6 +95,7 @@ def main():
         # total the warnings and errors from each header
         num_warnings += header.warnings_count
         num_errors += header.errors_count
+    # TODO file-wide warnings about non-matchiing fields between headers
     if print_mode != _VDIFPrintMode.NONE:
         stdout.write(f"{num_errors} errors, {num_warnings} warnings " \
             "generated.\n")
@@ -109,6 +110,7 @@ def __parse_args(args: list[str]) -> dict[str, Union[int, str, _VDIFPrintMode]]:
         "invalid": [],
     }
     value_field = ""
+    # TODO test and support stringed args and stringed/escaped filepath args
     for arg in args:
         if arg == "-h" or args == "--help":
             parsed_args["show_help"] = True

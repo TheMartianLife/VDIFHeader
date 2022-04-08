@@ -38,6 +38,8 @@ from vdifheader.vdifheader import VDIFHeader
 from vdifheader.vdifheaderfield import VDIFHeaderField
 from vdifheader._utils import Validity
 
+# TODO double-check import access modifiers (private modules are private, etc.)
+
 VDIF_HEADER_BYTES = 32
 STATION_ID_FILE = "station_ids.csv"
 
