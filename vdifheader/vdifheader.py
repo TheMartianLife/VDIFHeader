@@ -40,7 +40,7 @@ CHANNEL_LIMIT = 65536
 FRAME_LIMIT = 134217728
 HIGHEST_VERSION = 1
 THREAD_LIMIT = 1024
-
+EMPTY_FIELD = VDIFHeaderField("dummy field", 0, "0", Validity.INVALID)
 
 class VDIFHeader:
     """
@@ -83,30 +83,30 @@ class VDIFHeader:
     ######## PUBLIC FUNCTIONS
 
     def __init__(self):
-        # header values (should never be None after creation)
-        self.invalid_flag = None
-        self.legacy_mode = None
-        self.seconds_from_epoch = None
-        self.unassigned_field = None
-        self.reference_epoch = None
-        self.data_frame_number = None
-        self.vdif_version = None
-        self.num_channels = None
-        self.data_frame_length = None
-        self.data_type = None
-        self.bits_per_sample = None
-        self.thread_id = None
-        self.station_id = None
-        self.extended_data_version = None
-        self.extended_data = None
+        # header values (should never be EMPTY_FIELD after creation)
+        self.invalid_flag: VDIFHeaderField = EMPTY_FIELD
+        self.legacy_mode: VDIFHeaderField = EMPTY_FIELD
+        self.seconds_from_epoch: VDIFHeaderField = EMPTY_FIELD
+        self.unassigned_field: VDIFHeaderField = EMPTY_FIELD
+        self.reference_epoch: VDIFHeaderField = EMPTY_FIELD
+        self.data_frame_number: VDIFHeaderField = EMPTY_FIELD
+        self.vdif_version: VDIFHeaderField = EMPTY_FIELD
+        self.num_channels: VDIFHeaderField = EMPTY_FIELD
+        self.data_frame_length: VDIFHeaderField = EMPTY_FIELD
+        self.data_type: VDIFHeaderField = EMPTY_FIELD
+        self.bits_per_sample: VDIFHeaderField = EMPTY_FIELD
+        self.thread_id: VDIFHeaderField = EMPTY_FIELD
+        self.station_id: VDIFHeaderField = EMPTY_FIELD
+        self.extended_data_version: VDIFHeaderField = EMPTY_FIELD
+        self.extended_data: VDIFHeaderField = EMPTY_FIELD
         # utility values
-        self.warnings = []
-        self.warnings_count = 0
-        self.errors = []
-        self.errors_count = 0
-        self.raw_data = None
+        self.warnings: list[str] = []
+        self.warnings_count: int = 0
+        self.errors: list[str] = []
+        self.errors_count: int = 0
+        self.raw_data: str = ""
         # nullable values
-        self.header_num = None
+        self.header_num: Optional[int] = None
 
     @staticmethod
     def parse(raw_data: bytes, header_num: Optional[int]=None) -> "VDIFHeader":
@@ -187,7 +187,7 @@ class VDIFHeader:
     def print_verbose(self):
         """Prints a combination of raw, values, and summary output"""
         self.print_raw()
-        #self.print_values()
+        self.print_values()
         self.print_summary()
         return
 

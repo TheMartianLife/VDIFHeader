@@ -28,7 +28,7 @@ __maintainer__ = __author__
 __status__ = "Pre-release"
 __version__ = "0.1"
 
-from typing import Callable, Tuple, Union
+from typing import Callable, Optional, Tuple, Union
 
 from vdifheader.__utils__ import Validity
 
@@ -42,17 +42,18 @@ class VDIFHeaderField:
         raw_value: str
         validity: Validity
     """
+    
 
     ######## PUBLIC FUNCTIONS
 
     def __init__(self, name: str, value: Union[bool, int, str], 
-            raw_value: str, validity: Validity):
-        self._name = name
-        self.value = value
-        self.raw_value = raw_value
-        self.validity = validity
-        self.__validity_test = None
-        self.__always_valid = False
+        raw_value: str, validity: Validity):
+        self._name: str = name
+        self.value: Union[bool, int, str] = value
+        self.raw_value: str = raw_value
+        self.validity: Validity = validity
+        self.__validity_test: Optional[Callable] = None
+        self.__always_valid: bool = False
 
     ######## PRIVATE FUNCTIONS
 
