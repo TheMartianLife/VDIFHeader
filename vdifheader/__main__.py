@@ -113,7 +113,7 @@ def __parse_args(args: list[str]) -> dict[str, Union[int, str, _VDIFPrintMode]]:
         if arg == "-h" or args == "--help":
             parsed_args["show_help"] = True
             return parsed_args
-        elif arg == "-n" or arg == "count":
+        elif arg == "-n" or arg == "--count":
             value_field = "num_headers"
         elif arg == "-a" or arg == "--all":
             parsed_args["num_headers"] = -1  # (treated as 'all' value)

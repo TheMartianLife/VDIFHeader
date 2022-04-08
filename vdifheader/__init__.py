@@ -37,6 +37,7 @@ from vdifheader.vdifheader import VDIFHeader
 from vdifheader.vdifheaderfield import VDIFHeaderField
 
 VDIF_HEADER_BYTES = 32
+STATION_ID_FILE = "station_ids.csv"
 
 
 def get_first_header(input_filepath: str) -> Optional[VDIFHeader]:
@@ -76,6 +77,7 @@ def get_headers(input_filepath: str,
     if count is not None and count > 0:
         header_limit = True
     parsed_count = 0
+    header_num = None # set by (and then relative to) first header
     # allow relative/home-relative filepaths
     input_realpath = path.realpath(path.expanduser(input_filepath))
     with open(input_realpath, "rb") as input_file:
@@ -83,7 +85,12 @@ def get_headers(input_filepath: str,
         # until we find the end of the file, or otherwise break
         while raw_header is not None and len(raw_header) > 0:
             # parse the fetched raw header bytes
-            header = VDIFHeader.parse(raw_header, parsed_count)
+            if parsed_count == 0:
+                header = VDIFHeader.parse(raw_header)
+                # set start value for expected data frame numbers
+                header_num = header.header_num
+            else:
+                header = VDIFHeader.parse(raw_header, header_num + parsed_count)
             yield header
             parsed_count += 1
             # check if we've found as many headers as asked for

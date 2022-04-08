@@ -113,8 +113,13 @@ class VDIFHeader:
         """Creates VDIFHeader object populated from values in raw data"""
         header = VDIFHeader()
         header.raw_data = switch_endianness(raw_data)
-        header.header_num = header_num
         header.__parse_values()
+        if header_num is None: 
+            # this is the first header, so it dictates the start value
+            header.header_num = header.data_frame_number.value
+        else:
+            # should be first header num + offset in file
+            header.header_num = header_num 
         header.__validate_values()
         return header
 
@@ -290,7 +295,7 @@ class VDIFHeader:
         self.thread_id._set_validity_test(lambda x: x <= THREAD_LIMIT, 
             Validity.INVALID, "thread id exceeds limit")
         self.station_id._set_validity_test(lambda x: known_station_id(x),
-            Validity.UNKNOWN,  "station id not in known list")
+            Validity.UNKNOWN,  f"station id {self.station_id} not in known list")
         self.extended_data_version._set_validity_test(lambda x: known_edv(x),
             Validity.INVALID, "specified extended data version does not exist")
         # TODO fine-grained validity checking as per EDV

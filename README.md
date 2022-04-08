@@ -78,6 +78,8 @@ For detailed usage information, see the [vdifheader documentation](/docs).
 
 ## Dependencies
 
+> :warning: **WARNING**: This package uses type hinting from **Python 3.9** and above.
+
 The only required dependencies are within the Python standard library except for one optional dependency: `colorama`. If installed, this package enables colored debug output.
 
 <p align="center"><img src="docs/screenshot.png" style="padding:10px;width:80%;"></p>

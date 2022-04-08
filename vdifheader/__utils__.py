@@ -135,10 +135,46 @@ def known_station_id(station_id: str) -> bool:
     # TODO better central source of more station codes? these ones are from IVS
     # TODO also consider possible mark4 transformation mangling?
     # e.g. www.atnf.csiro.au/vlbi/dokuwiki/doku.php/difx/difx2mark4/stationcodes
-    known_ids = ["Oh", "Sy", "Ag", "Hb", "Ho", "Ke", "Yg", "Pa", "Ft", "Ur", 
-        "Sh", "Mh", "Eb", "Wz", "Mc", "Nt", "Ma", "Kb", "K1", "Kg", "Ts", "Is", 
-        "Mn", "Ww", "Ny", "Bd", "Sv", "Zc", "Yb", "Hh", "Kv", "On", "Sm", "Gs", 
-        "Gg", "Wf", "Kk", "Mp"]
+    known_ids = [
+        "Oh", # ERS/VLBI Station O'Higgins, Antarctica
+        "Sy", # JARE Syowa Station, Antarctica
+        "Ag", # Observatorio Argentina-Alemán de Geodesia (AGGO), Argentina
+        "Hb", # Hobart 12m, Mt. Pleasant Radio Observatory, Australia
+        "Ho", # Hobart 26m, Mt. Pleasant Radio Observatory, Australia
+        "Ke", # Katherine, Australia
+        "Mp", # Moprah, Australia
+        "Yg", # Yarragadee, Australia
+        "Pa", # Parkes Observatory, Australia
+        "Ft", # Fortaleza, Radio Observatorio Espacial do Nordes (ROEN), Brazil
+        "Ur", # Nanshan VLBI Station, China
+        "Sh", # Seshan, China
+        "Mh", # Metsähovi Radio Observatory, Finland
+        "Eb", # Effelsberg, Germany
+        "Wz", # Geodetic Observatory Wettzell, Germany
+        "Mc", # Medicina, Italy
+        "Nt", # Noto (Sicily), Italy
+        "Ma", # Matera, Italy
+        "Kb", # Kashima 34m, Japan
+        "K1", # Key Stone Project Kashima 11m, Japan
+        "Kg", # Key Stone Project Koganei, Japan
+        "Ts", # Tsukuba VLBI Station, Japan
+        "Is", # Ishioka VLBI Station, Japan
+        "Mn", # Mizusawa 10m, Japan
+        "Ww", # Warkworth Observatory, New Zealand
+        "Ny", # Ny-Alesund Geodetic Observatory, Norway
+        "Bd", # Radioastronomical Observatory Badary, Russia
+        "Sv", # Svetloe Radio Astronomy Observatory, Russia
+        "Zc", # Radioastronomical Observatory Zelenchukskaya, Russia
+        "Yb", # IGN Yebes Observatory, Spain
+        "Hh", # Hartebeesthoek Radio Astronomy Observatory, South Africa
+        "Kv", # Sejong Station, South Korea
+        "On", # Onsala Space Observatory, Sweden
+        "Sm", # Simeiz, Ukraine
+        "Gs", # Goddard Geophysical and Astronomical Observatory, USA
+        "Gg", # Goddard Geophysical and Astronomical Observatory, USA
+        "Wf", # Westford Antenna, Haystack Observatory, USA
+        "Kk", # Kokee Park Geophysical Observatory, USA
+    ]
     return (station_id in known_ids)
 
 
