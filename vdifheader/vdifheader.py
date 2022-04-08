@@ -28,6 +28,7 @@ __maintainer__ = __author__
 __status__ = "Pre-release"
 __version__ = "0.1"
 
+from os import path
 from math import pow
 from sys import stderr, stdout
 from datetime import datetime, timedelta, timezone
@@ -78,6 +79,9 @@ class VDIFHeader:
         print_raw()
         print_values()
         print_verbose()
+        to_dict() -> dict[str, Union[bool, int, str]]
+        to_inifile(output_filepath: str)
+        to_csv(output_filepath: str)
     """
 
     ######## PUBLIC FUNCTIONS
@@ -125,7 +129,7 @@ class VDIFHeader:
 
     def get_timestamp(self) -> datetime:
         """Gets reference epoch + seconds from epoch as datetime object"""
-        epoch = self.reference_epoch.value
+        epoch = self.__to_dt(self.reference_epoch.value)
         elapsed = timedelta(seconds=self.seconds_from_epoch.value)
         return epoch + elapsed
 
@@ -196,6 +200,38 @@ class VDIFHeader:
         self.print_summary()
         return
 
+    def to_dict(self) -> dict[str, Union[bool, int, str]]:
+        """Creates dictionary mapping of field names to field values"""
+        fields_dict = {}
+        for field_name in self.__public_fields():
+            field = getattr(self, field_name)
+            value = None if field == EMPTY_FIELD else field.value
+            fields_dict[field_name] = value
+        return fields_dict
+
+
+    def to_inifile(self, output_filepath: str):
+        """Writes file of name=value for each field in header"""
+        output_realpath = path.realpath(path.expanduser(output_filepath))
+        with open(output_realpath, "w+") as output_file:
+            for field_name in self.__public_fields():
+                field = getattr(self, field_name)
+                value = field.value
+                if type(value) is bool:
+                    value = str(value).lower()
+                output_file.write(f"{field._name}={value}\n")
+        return
+
+    def to_csv(self, output_filepath: str):
+        """Writes file of field_name,field_value for each field in header"""
+        output_realpath = path.realpath(path.expanduser(output_filepath))
+        with open(output_realpath, "w+") as output_file:
+            output_file.write("field_name,field_value\n")
+            for field_name in self.__public_fields():
+                field = getattr(self, field_name)
+                output_file.write(f"{field._name},{field.value}\n")
+        return
+
     ######## PRIVATE FUNCTIONS
 
     def __repr__(self) -> str:
@@ -247,8 +283,8 @@ class VDIFHeader:
         int_value, raw = header_bits(self.raw_data, *header_position(key))
         year = 2000 + (int_value // 2)
         month = 1 if (int_value % 2 == 0) else 7
-        date_value = datetime(year, month, day=1, tzinfo=timezone.utc)
-        setattr(self, key, VDIFHeaderField(key, date_value, raw, unknown))
+        date_value = datetime(year, month, day=1, tzinfo=timezone.utc).date()
+        setattr(self, key, VDIFHeaderField(key, str(date_value), raw, unknown))
         key = "data_type"
         int_value, raw = header_bits(self.raw_data, *header_position(key))
         string_value = "complex" if (int_value == 1) else "real"
@@ -280,7 +316,8 @@ class VDIFHeader:
         self.seconds_from_epoch._set_always_valid()
         self.unassigned_field._set_validity_test(lambda x: x == 0,
             Validity.INVALID, "synch code field contains incorrect value")
-        self.reference_epoch._set_validity_test(lambda x: x <= epoch_limit,
+        self.reference_epoch._set_validity_test(
+            lambda x: self.__to_dt(x) <= epoch_limit,
             Validity.INVALID, "reference epoch is in the future")
         self.data_frame_number._set_validity_test(lambda x: x == frame_idx,
             Validity.UNKNOWN, "data frame number does not match index in file")
@@ -295,7 +332,7 @@ class VDIFHeader:
         self.thread_id._set_validity_test(lambda x: x <= THREAD_LIMIT, 
             Validity.INVALID, "thread id exceeds limit")
         self.station_id._set_validity_test(lambda x: known_station_id(x),
-            Validity.UNKNOWN,  f"station id {self.station_id} not in known list")
+            Validity.UNKNOWN, "station id not in known list")
         self.extended_data_version._set_validity_test(lambda x: known_edv(x),
             Validity.INVALID, "specified extended data version does not exist")
         # TODO fine-grained validity checking as per EDV
@@ -304,6 +341,11 @@ class VDIFHeader:
         for field_name in self.__public_fields():
             self.__validate_field(field_name)
         return
+
+    def __to_dt(self, value: str) -> datetime:
+        date_value = datetime.strptime(value, "%Y-%m-%d")
+        date_value = date_value.replace(tzinfo=timezone.utc)
+        return date_value
 
     def __validate_field(self, field_name: str):
         """Runs stored validity test on field and stores message upon failure"""

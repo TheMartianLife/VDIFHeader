@@ -90,7 +90,7 @@ This project is licensed under the terms of the [GNU General Public License, ver
 
 ## Planned Improvements
 
-* Handling of Extended Data fields.
-* Ability to change values in `VDIFHeader`, write them back to valid binary header.
-* Output header values to formats such as iniFile/csv/json.
-* Extensible (i.e. define-your-own) field validity constraints.
+- [ ] Handling of Extended Data fields.
+- [ ] Ability to change values in `VDIFHeader`, write them back to valid binary header.
+- [x] Output header values to formats such as ~~iniFile~~/~~csv~~/json/~~dict~~.
+- [ ] Extensible (i.e. define-your-own) field validity constraints.

@@ -67,7 +67,7 @@ class VDIFHeaderField:
 
     def __eq__(self, other: Union[bool, int, str, "VDIFHeaderField"]) -> bool:
         """Defines field equality to include a primitive equal to field value"""
-        if other is VDIFHeaderField:
+        if isinstance(other, VDIFHeaderField):
             return (
                 self._name == other._name
                 and self.value == other.value

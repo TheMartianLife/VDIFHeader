@@ -31,7 +31,6 @@ __version__ = "0.1"
 from os import path
 from sys import stderr
 from typing import Optional
-from csv import DictReader
 
 from vdifheader.vdifheader import VDIFHeader
 from vdifheader.vdifheaderfield import VDIFHeaderField
