@@ -30,6 +30,7 @@ __status__ = "Pre-release"
 __version__ = "0.1"
 
 from enum import Enum
+from typing import List, Tuple, Union
 
 try:  # colors if they have them
     import colorama
@@ -55,7 +56,7 @@ class __DebugColor:
     NONE = "\033[0m"
 
 
-def colorify(message, color):
+def colorify(message: str, color: Union[Validity, __DebugColor]):
     """Prepends corresponding ANSI color code, appends style reset code"""
     if color == __DebugColor.YELLOW or color == Validity.UNKNOWN:
         return f"{__DebugColor.YELLOW}{message}{__DebugColor.NONE}"
@@ -67,7 +68,7 @@ def colorify(message, color):
         return message
 
 
-def switch_endianness(raw_data):
+def switch_endianness(raw_data: bytes) -> List[str]:
     """Reverses the bits in each word but retains word order"""
     data = list(raw_data)
     switched_data = []
@@ -79,14 +80,15 @@ def switch_endianness(raw_data):
     return switched_data
 
 
-def header_bits(raw_data, word, start_bit, num_bits):
+def header_bits(raw_data: List[str], word: int, start_bit: int, 
+        num_bits: int) -> Tuple[int, str]:
     """Accesses bits within two-dimensional raw data"""
     word_data = reversed_bits(raw_data[word])
     bits = reversed_bits(word_data[start_bit: start_bit + num_bits])
     return (int(bits, 2), bits)
 
 
-def header_extended_bits(raw_data):
+def header_extended_bits(raw_data: List[str]) -> str:
     """Accesses bits 128-255 of raw data, omitting bits 152-159"""
     bits = ""
     for word in range(4, 8):
@@ -97,7 +99,7 @@ def header_extended_bits(raw_data):
     return bits
 
 
-def header_position(key):
+def header_position(key: str) -> Tuple[int, int, int]:
     """Returns word number, starting bit number, and count of bits for key"""
     positions = {  # word, start_bit, num_bits
         "invalid_flag": (0, 31, 1),
@@ -118,8 +120,8 @@ def header_position(key):
     return positions[key]
 
 
-def convert_station_id(raw_id):
-    """Converts raw id to unsigned int or 2-char ASCII, depending on value"""
+def convert_station_id(raw_id: str) -> str:
+    """Stringifies raw id as unsigned int or 2-char ASCII, depending on value"""
     char1 = int(raw_id[0:8], 2)
     char2 = int(raw_id[8:16], 2)
     if char2 != 48:  # where char2 == ASCII 0x30 means "treat this as int"
@@ -128,7 +130,7 @@ def convert_station_id(raw_id):
         return f"{int(raw_id, 2)}"
 
 
-def known_station_id(station_id):
+def known_station_id(station_id: str) -> bool:
     """Checks for station id in included list of known ids"""
     # TODO better central source of more station codes? these ones are from IVS
     # TODO also consider possible mark4 transformation mangling?
@@ -140,11 +142,11 @@ def known_station_id(station_id):
     return (station_id in known_ids)
 
 
-def known_edv(extended_data_version):
+def known_edv(extended_data_version: int) -> bool:
     """Checks for extended data version in included list of known version ids"""
     known_edvs = [0x00, 0x01, 0x02, 0x03, 0x04, 0xab]
     return (extended_data_version in known_edvs)
 
 
-def reversed_bits(binary_string):
+def reversed_bits(binary_string: str) -> str:
     return "".join(reversed(binary_string))

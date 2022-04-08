@@ -31,6 +31,7 @@ __version__ = "0.1"
 from os import path
 from sys import argv, stderr, stdout
 from enum import Enum
+from types import Dict, List, Union
 
 from vdifheader.__init__ import *
 
@@ -100,7 +101,7 @@ def main():
     return
 
 
-def __parse_args(args):
+def __parse_args(args: List[str]) -> Dict[str, Union[int, str, _VDIFPrintMode]]:
     """Parses and validates args and flags, setting defaults where needed"""
     parsed_args = {  # default values
         "num_headers": -1,

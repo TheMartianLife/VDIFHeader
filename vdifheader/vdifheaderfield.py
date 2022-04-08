@@ -14,11 +14,6 @@
 """
 > vdifheader - vdifheaderfield.py
 Defines VDIFHeaderField class that represents a single field within a VDIFHeader
-
-class VDIFHeaderField:
-    value: Union[int, str, bool]
-    raw_value: str
-    validity: Validity
 """
 __author__ = "Mars Buttfield-Addison"
 __authors__ = [__author__]
@@ -33,15 +28,25 @@ __maintainer__ = __author__
 __status__ = "Pre-release"
 __version__ = "0.1"
 
+from typing import Callable, Tuple, Union
+
 from vdifheader.__utils__ import Validity
 
 
 class VDIFHeaderField:
-    """A class that represents a single field within a VDIFHeader object"""
+    """
+    A class that represents a single field within a VDIFHeader object
+
+    attributes:
+        value: Union[bool, int, str]
+        raw_value: str
+        validity: Validity
+    """
 
     ######## PUBLIC FUNCTIONS
 
-    def __init__(self, name, value, raw_value, validity):
+    def __init__(self, name: str, value: Union[bool, int, str], 
+            raw_value: str, validity: Validity):
         self._name = name
         self.value = value
         self.raw_value = raw_value
@@ -51,15 +56,15 @@ class VDIFHeaderField:
 
     ######## PRIVATE FUNCTIONS
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Defines pretty print string representation of object"""
         return f"<VDIFHeaderField _name={self._name}, value={self.value}>"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Defines string representation of object"""
         return f"{self.value}"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Union[bool, int, str, "VDIFHeaderField"]) -> bool:
         """Defines field equality to include a primitive equal to field value"""
         if other is VDIFHeaderField:
             return (
@@ -74,7 +79,8 @@ class VDIFHeaderField:
 
     ######## INTERNAL FUNCTIONS
 
-    def _set_validity_test(self, validity_test, validity, message):
+    def _set_validity_test(self, validity_test: Callable, 
+            validity: Validity, message: str):
         """Stores given validity test for field value"""
         self.__validity_test = (validity_test, validity, message)
         return
@@ -84,7 +90,7 @@ class VDIFHeaderField:
         self.__always_valid = True
         return
 
-    def _revalidate(self):
+    def _revalidate(self) -> Tuple[Validity, str]:
         """Updates validity based on current value versus field constraints"""
         if self.__always_valid:
             self.validity = Validity.VALID

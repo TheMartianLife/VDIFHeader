@@ -14,37 +14,6 @@
 """
 > vdifheader - vdifheader.py
 Defines VDIFHeader class that represents a single header within a VDIF file
-
-class VDIFHeader:
-    invalid_flag: VDIFHeaderField
-    legacy_mode: VDIFHeaderField
-    seconds_from_epoch: VDIFHeaderField
-    unassigned_field: VDIFHeaderField
-    reference_epoch: VDIFHeaderField
-    data_frame_number: VDIFHeaderField
-    vdif_version: VDIFHeaderField
-    num_channels: VDIFHeaderField
-    data_frame_length: VDIFHeaderField
-    data_type: VDIFHeaderField
-    bits_per_sample: VDIFHeaderField
-    thread_id: VDIFHeaderField
-    station_id: VDIFHeaderField
-    extended_data_version: VDIFHeaderField
-    extended_data: VDIFHeaderField
-    header_num: Optional[int]
-    warnings: List[str]
-    warnings_count: int
-    errors: List[str]
-    errors_count: int
-    raw_data: Optional[List[str]]
-
-    @staticmethod 
-    parse(raw_data: bytes, header_num: Optional[int]=None) -> VDIFHeader
-    get_timestamp() -> datetime.datetime
-    print_summary()
-    print_raw()
-    print_values()
-    print_verbose()
 """
 __author__ = "Mars Buttfield-Addison"
 __authors__ = [__author__]
@@ -62,6 +31,7 @@ __version__ = "0.1"
 from math import pow
 from sys import stderr, stdout
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from vdifheader.__utils__ import *
 from vdifheader.vdifheaderfield import VDIFHeaderField
@@ -73,12 +43,47 @@ THREAD_LIMIT = 1024
 
 
 class VDIFHeader:
-    """A class that represents a single header within a VDIF file"""
+    """
+    A class that represents a single header within a VDIF file
+    
+    attributes:
+        invalid_flag: VDIFHeaderField
+        legacy_mode: VDIFHeaderField
+        seconds_from_epoch: VDIFHeaderField
+        unassigned_field: VDIFHeaderField
+        reference_epoch: VDIFHeaderField
+        data_frame_number: VDIFHeaderField
+        vdif_version: VDIFHeaderField
+        num_channels: VDIFHeaderField
+        data_frame_length: VDIFHeaderField
+        data_type: VDIFHeaderField
+        bits_per_sample: VDIFHeaderField
+        thread_id: VDIFHeaderField
+        station_id: VDIFHeaderField
+        extended_data_version: VDIFHeaderField
+        extended_data: VDIFHeaderField
+        warnings: List[str]
+        warnings_count: int
+        errors: List[str]
+        errors_count: int
+        raw_data: Optional[List[str]]
+        header_num: Optional[int]
+
+    @staticmethods:
+        parse(raw_data: bytes, header_num: Optional[int]=None) -> VDIFHeader
+
+    methods:
+        get_timestamp() -> datetime
+        print_summary()
+        print_raw()
+        print_values()
+        print_verbose()
+    """
 
     ######## PUBLIC FUNCTIONS
 
     def __init__(self):
-        # header values
+        # header values (should never be None after creation)
         self.invalid_flag = None
         self.legacy_mode = None
         self.seconds_from_epoch = None
@@ -95,15 +100,16 @@ class VDIFHeader:
         self.extended_data_version = None
         self.extended_data = None
         # utility values
-        self.header_num = None
         self.warnings = []
         self.warnings_count = 0
         self.errors = []
         self.errors_count = 0
         self.raw_data = None
+        # nullable values
+        self.header_num = None
 
     @staticmethod
-    def parse(raw_data, header_num=None):
+    def parse(raw_data: bytes, header_num: Optional[int]=None) -> "VDIFHeader":
         """Creates VDIFHeader object populated from values in raw data"""
         header = VDIFHeader()
         header.raw_data = switch_endianness(raw_data)
@@ -112,7 +118,7 @@ class VDIFHeader:
         header.__validate_values()
         return header
 
-    def get_timestamp(self):
+    def get_timestamp(self) -> datetime:
         """Gets reference epoch + seconds from epoch as datetime object"""
         epoch = self.reference_epoch.value
         elapsed = timedelta(seconds=self.seconds_from_epoch.value)
@@ -187,7 +193,7 @@ class VDIFHeader:
 
     ######## PRIVATE FUNCTIONS
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Defines pretty print string representation of object"""
         repr_string = "<VDIFHeader"
         for field in self.public_fields():
@@ -196,12 +202,12 @@ class VDIFHeader:
         repr_string += ">"
         return repr_string
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Defines string representation of object"""
         return f"<VDIFHeader station_id={self.station_id},\
             timestamp={self.get_timestamp()}>"
 
-    def __public_fields(self):
+    def __public_fields(self) -> List[str]:
         """Gets field names, omitting utility fields such as errors count"""
         return ["invalid_flag", "legacy_mode", "seconds_from_epoch",
             "unassigned_field", "reference_epoch", "data_frame_number",
@@ -294,7 +300,7 @@ class VDIFHeader:
             self.__validate_field(field_name)
         return
 
-    def __validate_field(self, field_name):
+    def __validate_field(self, field_name: str):
         """Runs stored validity test on field and stores message upon failure"""
         field = getattr(self, field_name)
         result, new_message = field._revalidate()
