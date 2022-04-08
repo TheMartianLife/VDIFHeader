@@ -80,11 +80,12 @@ class VDIFHeaderField:
     def _revalidate(self):
         """Updates validity based on current value versus field constraints"""
         if self.__always_valid:
-            return (Validity.VALID, None)
+            self.validity = Validity.VALID
+            return (self.validity, None)
         elif self.__validity_test is None:
             self.validity = Validity.UNKNOWN
             default_message = "no known validity test for field {self._name}"
-            return (Validity.UNKNOWN, default_message)
+            return (self.validity, default_message)
         validity_test, failure_validity, message = self.__validity_test
         test_success = validity_test(self.value)
         if test_success:
