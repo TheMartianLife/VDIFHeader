@@ -15,7 +15,8 @@
 > vdifheader - __init__.py (private)
 Defines publicly acessible API functions for the vdifheader package
 """
-__all__ = ["vdifheader", "vdifheaderfield"]
+__all__ = ["get_first_header", "get_headers", "VDIFHeader", 
+    "VDIFHeaderField", "Validity"]
 __author__ = "Mars Buttfield-Addison"
 __authors__ = [__author__]
 __contact__ = "hello@themartianlife.com"
@@ -29,19 +30,17 @@ __maintainer__ = __author__
 __status__ = "Pre-release"
 __version__ = "0.1"
 
-
 from os import path
 from sys import stderr
-from typing import Optional
+from typing import Iterator, Optional
 
 from vdifheader.vdifheader import VDIFHeader
 from vdifheader.vdifheaderfield import VDIFHeaderField
 from vdifheader._utils import Validity
 
-# TODO double-check import access modifiers (private modules are private, etc.)
 
+# TODO double-check import access modifiers (private modules are private, etc.)
 VDIF_HEADER_BYTES = 32
-STATION_ID_FILE = "station_ids.csv"
 
 
 def get_first_header(input_filepath: str) -> Optional[VDIFHeader]:
@@ -65,7 +64,7 @@ def get_first_header(input_filepath: str) -> Optional[VDIFHeader]:
 
 
 def get_headers(input_filepath: str, 
-        count: Optional[int]=None) -> list[VDIFHeader]:
+        count: Optional[int]=None) -> Iterator[VDIFHeader]:
     """
     Returns list of first count headers from file at input filepath
 
@@ -74,7 +73,7 @@ def get_headers(input_filepath: str,
             count: Optional[int]    number of headers to parse, else parse all
 
         returns:
-           list[VDIFHeader]         header data if found, else empty    
+           Iterator[VDIFHeader]     header data if found, else empty    
     """
     header_limit = False
     # if count is invalid, header_limit is disabled. include all headers in file

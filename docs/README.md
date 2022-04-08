@@ -23,7 +23,7 @@ get_first_header(input_filepath: str) -> Optional[VDIFHeader]
 Attempts to fetch first 32 bytes from file at `input_filepath`, interpret them as a VDIF header, and return a `VDIFHeader` object populated with `VDIFHeaderField` objects for each value found within the raw data. If file cannot be read, return value is `None`.
 
 ```python
-get_headers(input_filepath: str, count: Optional[int]=None) -> list[VDIFHeader]
+get_headers(input_filepath: str, count: Optional[int]=None) -> Iterator[VDIFHeader]
 ```
 
 Attempts to fetch sufficient bytes from file at `input_filepath` to populate `count` `VDIFHeader` objects, each populated with `VDIFHeaderField` objects. If file cannot be read, return value is an empty list. If `count` is negative or `None`, the function will attempt to parse all headers present in the file.

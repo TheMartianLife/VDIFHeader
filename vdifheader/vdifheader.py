@@ -37,6 +37,7 @@ from typing import Optional
 from vdifheader._utils import *
 from vdifheader.vdifheaderfield import VDIFHeaderField
 
+
 CHANNEL_LIMIT = 65536
 FRAME_LIMIT = 134217728
 HIGHEST_VERSION = 1

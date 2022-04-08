@@ -17,13 +17,13 @@ A simple Python library for parsing and validating the format and values of **VD
 When imported as a package, users have access to two main functions:
 
 * `get_first_header(input_filepath)` - function returns the first header in the provided file as a `VDIFHeader` object.
-* `get_headers(input_filepath, count=None)` - generator function returns the first `count` headers in the provided file, as a **generator**[^2] of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse all headers found in the file. 
+* `get_headers(input_filepath, count=None)` - iterator function returns the first `count` headers in the provided file, as a **iterator**[^2] of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse all headers found in the file. 
 
 Each `VDIFHeader` object is populated with `VDIFHeaderField` objects that hold the `value` and `validity` for each contained property. Validity is always `VALID`, `INVALID` or `UNKNOWN`.
 
-> :brain: **REMEMBER**: Python generators are very fast for large input, but are consumed if operated on. So if you write `output = some_generator()` and then iterate over `output` (e.g. `for item in output`), the output will now be empty.
+> :brain: **REMEMBER**: Python iterators are very fast for large input, but are consumed if operated on. So if you write `output = some_iterator()` and then iterate over `output` (e.g. `for item in output`), the output will now be empty.
 
-[^2]: Generators in Python are a type of function that *generates* a result, rather than *returns* a result. For operating over potentially large input, this means not waiting for the whole thing to be loaded into memory before starting work (see: [wiki.python.org](https://wiki.python.org/moin/Generators)).
+[^2]: Iterators in Python are a type of function that *generates* a result, rather than *returns* a result. For operating over potentially large input, this means not waiting for the whole thing to be loaded into memory before starting work (see: [wiki.python.org](https://wiki.python.org/moin/Iterator)).
 
 ```python
 import vdifheader as vh
@@ -32,7 +32,7 @@ from vdifheader import Validity
 input_filepath = './some_input_file.vdif'
 
 # get some headers
-headers = vh.get_headers(input_filepath, count=5) # as generator (fast)
+headers = vh.get_headers(input_filepath, count=5) # as iterator (fast)
 headers_list = list(headers) # as list (sticks around)
 for header in headers_list:
     header.print_summary()
