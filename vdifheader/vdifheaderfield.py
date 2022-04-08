@@ -45,12 +45,15 @@ class VDIFHeaderField:
     ######## PRIVATE FUNCTIONS
 
     def __repr__(self):
+        """Defines pretty print string representation of object"""
         return f"<VDIFHeaderField _name={self._name}, value={self.value}>"
 
     def __str__(self):
+        """Defines string representation of object"""
         return f"{self.value}"
 
     def __eq__(self, other):
+        """Defines field equality to include a primitive equal to field value"""
         if other is VDIFHeaderField:
             return (
                 self._name == other._name
@@ -65,15 +68,17 @@ class VDIFHeaderField:
     ######## INTERNAL FUNCTIONS
 
     def _set_validity_test(self, validity_test, validity, message):
+        """Stores given validity test for field value"""
         self.__validity_test = (validity_test, validity, message)
         return
 
     def _set_always_valid(self):
+        """Sets validity test to always pass for this field"""
         self.__always_valid = True
         return
 
     def _revalidate(self):
-        """Update validity based on current value versus field constraints"""
+        """Updates validity based on current value versus field constraints"""
         if self.__always_valid:
             return (Validity.VALID, None)
         elif self.__validity_test is None:

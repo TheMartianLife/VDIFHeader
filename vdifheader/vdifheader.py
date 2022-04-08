@@ -31,8 +31,12 @@ from sys import stderr, stdout
 from datetime import datetime, timedelta, timezone
 
 from vdifheader.__utils__ import *
-from vdifheader.__utils__ import _DebugColor
 from vdifheader.vdifheaderfield import VDIFHeaderField
+
+CHANNEL_LIMIT = 65536
+FRAME_LIMIT = 134217728
+HIGHEST_VERSION = 1
+THREAD_LIMIT = 1024
 
 
 class VDIFHeader:
@@ -67,7 +71,7 @@ class VDIFHeader:
 
     @staticmethod
     def parse(raw_data, header_num=None):
-        """Returns VDIFHeader object populated from values in (raw_data)"""
+        """Creates VDIFHeader object populated from values in raw data"""
         header = VDIFHeader()
         header.raw_data = switch_endianness(raw_data)
         header.header_num = header_num
@@ -76,7 +80,7 @@ class VDIFHeader:
         return header
 
     def get_timestamp(self):
-        """Returns reference_epoch + seconds_from_epoch as datetime object"""
+        """Gets reference epoch + seconds from epoch as datetime object"""
         epoch = self.reference_epoch.value
         elapsed = timedelta(seconds=self.seconds_from_epoch.value)
         return epoch + elapsed
@@ -85,10 +89,10 @@ class VDIFHeader:
         """Prints warnings and errors found during validation"""
         for warning in self.warnings:
             message = f"WARNING: {warning} (header {self.header_num}).\n"
-            stderr.write(colorify(message, _DebugColor.YELLOW))
+            stderr.write(colorify(message, Validity.UNKNOWN))
         for error in self.errors:
             message = f"ERROR: {error} (header {self.header_num}).\n"
-            stderr.write(colorify(message, _DebugColor.RED))
+            stderr.write(colorify(message, Validity.INVALID))
 
     def print_values(self):
         """Prints key and value for each of the available header fields"""
@@ -142,6 +146,7 @@ class VDIFHeader:
         stdout.write(output_string)
 
     def print_verbose(self):
+        """Prints a combination of raw, values, and summary output"""
         self.print_raw()
         self.print_values()
         self.print_summary()
@@ -150,6 +155,7 @@ class VDIFHeader:
     ######## PRIVATE FUNCTIONS
 
     def __repr__(self):
+        """Defines pretty print string representation of object"""
         repr_string = "<VDIFHeader"
         for field in self.public_fields():
             repr_string += "\n  "
@@ -158,29 +164,20 @@ class VDIFHeader:
         return repr_string
 
     def __str__(self):
+        """Defines string representation of object"""
         return f"<VDIFHeader station_id={self.station_id},\
             timestamp={self.get_timestamp()}>"
 
     def __public_fields(self):
-        return [
-            "invalid_flag",
-            "legacy_mode",
-            "seconds_from_epoch",
-            "unassigned_field",
-            "reference_epoch",
-            "data_frame_number",
-            "vdif_version",
-            "num_channels",
-            "data_frame_length",
-            "data_type",
-            "bits_per_sample",
-            "thread_id",
-            "station_id",
-            "extended_data_version",
-            "extended_data",
-        ]
+        """Gets field names, omitting utility fields such as errors count"""
+        return ["invalid_flag", "legacy_mode", "seconds_from_epoch",
+            "unassigned_field", "reference_epoch", "data_frame_number",
+            "vdif_version", "num_channels", "data_frame_length", "data_type",
+            "bits_per_sample", "thread_id", "station_id",
+            "extended_data_version", "extended_data"]
 
     def __parse_values(self):
+        """Gets and parses appropriate bits from raw data into header fields"""
         unknown = Validity.UNKNOWN
         # some values are booleans
         boolean_fields = ["invalid_flag", "legacy_mode"]
@@ -189,17 +186,10 @@ class VDIFHeader:
             field_object = VDIFHeaderField(key, (int_value == 1), raw, unknown)
             setattr(self, key, field_object)
         # some values are integers
-        integer_fields = [
-            "seconds_from_epoch",
-            "unassigned_field",
-            "data_frame_number",
-            "vdif_version",
-            "num_channels",
-            "data_frame_length",
-            "bits_per_sample",
-            "thread_id",
-            "extended_data_version",
-        ]
+        integer_fields = ["seconds_from_epoch", "unassigned_field",
+            "data_frame_number", "vdif_version", "num_channels",
+            "data_frame_length", "bits_per_sample", "thread_id",
+            "extended_data_version"]
         for key in integer_fields:
             int_value, raw = header_bits(self.raw_data, *header_position(key))
             field_object = VDIFHeaderField(key, int_value, raw, unknown)
@@ -229,6 +219,7 @@ class VDIFHeader:
         return
 
     def __validate_values(self):
+        """Assigns validity tests for each field based on VDIF spec"""
         # get current time, to check against if reference epoch in the future
         # yes, this is only set once. but that makes sense because if it was in
         # the future at any time after the file itself was formed, it's wrong
@@ -237,58 +228,32 @@ class VDIFHeader:
         # now to set on each field: a test to run, ...
         # ... the validity to set if the test fails, ...
         # ... the message to add to warning or error log if it fails
-        self.invalid_flag._set_validity_test(
-            lambda x: not x, Validity.UNKNOWN, 
-            "frame flagged as invalid by source"
-        )
-        self.legacy_mode._set_validity_test(
-            lambda x: not x, Validity.UNKNOWN, "legacy format enabled"
-        )
+        self.invalid_flag._set_validity_test(lambda x: not x, 
+            Validity.UNKNOWN, "frame flagged as invalid by source")
+        self.legacy_mode._set_validity_test(lambda x: not x, 
+            Validity.UNKNOWN, "legacy format enabled")
         # TODO smarter multi-field checking for if epoch + elapsed is in future
         self.seconds_from_epoch._set_always_valid()
-        self.unassigned_field._set_validity_test(
-            lambda x: x == 0,
-            Validity.INVALID,
-            "synch code field contains incorrect value",
-        )
-        self.reference_epoch._set_validity_test(
-            lambda x: x <= epoch_limit,
-            Validity.INVALID,
-            "reference epoch is in the future",
-        )
-        self.data_frame_number._set_validity_test(
-            lambda x: x == frame_idx,
-            Validity.UNKNOWN,
-            "data frame number does not match index in file",
-        )
-        self.vdif_version._set_validity_test(
-            lambda x: x < 2, Validity.INVALID, 
-            "specified vdif version does not exist"
-        )
-        self.num_channels._set_validity_test(
-            lambda x: x <= 65536, Validity.UNKNOWN, 
-            "num_channels exceeds soft cap"
-        )
-        self.data_frame_length._set_validity_test(
-            lambda x: x <= 134217728,
-            Validity.INVALID,
-            "data frame length exceeds limit",
-        )
+        self.unassigned_field._set_validity_test(lambda x: x == 0,
+            Validity.INVALID, "synch code field contains incorrect value")
+        self.reference_epoch._set_validity_test(lambda x: x <= epoch_limit,
+            Validity.INVALID, "reference epoch is in the future")
+        self.data_frame_number._set_validity_test(lambda x: x == frame_idx,
+            Validity.UNKNOWN, "data frame number does not match index in file")
+        self.vdif_version._set_validity_test(lambda x: x <= HIGHEST_VERSION, 
+            Validity.INVALID, "specified vdif version does not exist")
+        self.num_channels._set_validity_test(lambda x: x <= CHANNEL_LIMIT, 
+            Validity.UNKNOWN, "num_channels exceeds soft cap")
+        self.data_frame_length._set_validity_test(lambda x: x <= FRAME_LIMIT,
+            Validity.INVALID, "data frame length exceeds limit")
         self.data_type._set_always_valid()
         self.bits_per_sample._set_always_valid()
-        self.thread_id._set_validity_test(
-            lambda x: x <= 1024, Validity.INVALID, "thread id exceeds limit"
-        )
-        self.station_id._set_validity_test(
-            lambda x: known_station_id(x),
-            Validity.UNKNOWN,
-            "station id not in known list",
-        )
-        self.extended_data_version._set_validity_test(
-            lambda x: (x < 5 or x == 172),
-            Validity.INVALID,
-            "specified extended data version does not exist",
-        )
+        self.thread_id._set_validity_test(lambda x: x <= THREAD_LIMIT, 
+            Validity.INVALID, "thread id exceeds limit")
+        self.station_id._set_validity_test(lambda x: known_station_id(x),
+            Validity.UNKNOWN,  "station id not in known list")
+        self.extended_data_version._set_validity_test(lambda x: known_edv(x),
+            Validity.INVALID, "specified extended data version does not exist")
         # TODO fine-grained validity checking as per EDV
         self.extended_data._set_always_valid()
         # now that they're set, here is where the checks actually run
@@ -297,6 +262,7 @@ class VDIFHeader:
         return
 
     def __validate_field(self, field_name):
+        """Runs stored validity test on field and stores message upon failure"""
         field = getattr(self, field_name)
         result, new_message = field._revalidate()
         if result == Validity.UNKNOWN:
@@ -308,5 +274,6 @@ class VDIFHeader:
         return
 
     def __print_edv_values(self):
+        """Prints any known extended data values, for print values output"""
         # TODO do that
         return

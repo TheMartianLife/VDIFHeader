@@ -42,6 +42,7 @@ class _VDIFPrintMode(Enum):
 
 
 def main():
+    """Gets headers from input filepath and prints output in requested mode"""
     # global variables for access in interactive mode after main() completes
     global headers
     global first_header
@@ -98,6 +99,7 @@ def main():
 
 
 def __parse_args(args):
+    """Parses and validates args and flags, setting defaults where needed"""
     parsed_args = {  # default values
         "num_headers": -1,
         "print_mode": _VDIFPrintMode.SUMMARY,
@@ -123,10 +125,8 @@ def __parse_args(args):
                 num_headers = int(arg)
             except ValueError:
                 parsed_args["invalid"].append(f"-n {arg}")
-                stderr.write(
-                    f"WARNING: arg {arg} invalid for num_headers. "
-                    "Defaulting to all.\n"
-                )
+                stderr.write(f"WARNING: arg {arg} invalid for num_headers. " \
+                    "Defaulting to all.\n")
                 num_headers = -1
             parsed_args["num_headers"] = num_headers
             value_field = ""
@@ -135,10 +135,8 @@ def __parse_args(args):
                 print_mode = _VDIFPrintMode[arg.upper()]
             except KeyError:
                 parsed_args["invalid"].append(f"-p {arg}")
-                stderr.write(
-                    f"WARNING: arg '{arg}' invalid for print_mode. "
-                    "Defaulting to 'summary'.\n"
-                )
+                stderr.write(f"WARNING: arg '{arg}' invalid for print_mode. " \
+                    "Defaulting to 'summary'.\n")
                 print_mode = _VDIFPrintMode.SUMMARY
             parsed_args["print_mode"] = print_mode
             value_field = ""
@@ -146,27 +144,27 @@ def __parse_args(args):
             parsed_args["input_filepath"] = arg
         else:
             parsed_args["invalid"].append(arg)
-            stderr.write(
-                f"WARNING: arg {arg} is invalid arg for position. " \
-                "Ignoring arg.\n"
-            )
+            stderr.write(f"WARNING: arg {arg} is invalid arg for position. " \
+                "Ignoring arg.\n")
     # if we get to here without a valid input_filepath
     if not "input_filepath" in parsed_args:
         stderr.write(f"ERROR: no input_filepath provided.\n")
     elif not path.isfile(parsed_args["input_filepath"]):
         stderr.write(f"ERROR: {parsed_args['input_filepath']} is not a " \
             "file.\n")
-        del parsed_args["input_filepath"]
+        del parsed_args["input_filepath"] # invalid is as good as none
     return parsed_args
 
 
 def __show_usage():
+    """Shows one-line usage information"""
     stdout.write("usage: vdifheader [options] [file]\n")
     return
 
 
 def __show_help():
-    __show_usage()
+    """Shows a nicely styled manpage-like description of valid args and flags"""
+    __show_usage() # show usage line first
     stdout.write("  options:\n")
     stdout.write("    -h, --help\t\tshow help\n")
     stdout.write("    -n --count [arg]\tnumber of headers to parse\n")

@@ -35,7 +35,7 @@ VDIF_HEADER_BYTES = 32
 
 
 def get_first_header(input_filepath):
-    """Returns first header from file at (input_filepath)"""
+    """Returns first header from file at input filepath"""
     # just call get_headers but with count=1
     headers = list(get_headers(input_filepath, count=1))
     # then make sure there was one result, and extract it from the result array
@@ -47,7 +47,7 @@ def get_first_header(input_filepath):
 
 
 def get_headers(input_filepath, count=None):
-    """Returns list of first (count) headers from file at (input_filepath)"""
+    """Returns list of first count headers from file at input filepath"""
     header_limit = False
     # if count is invalid, header_limit is disabled. include all headers in file
     if count is not None and count > 0:
@@ -72,6 +72,5 @@ def get_headers(input_filepath, count=None):
             # and get next raw header bytes
             raw_header = input_file.read(VDIF_HEADER_BYTES)
     if header_limit and parsed_count != count:
-        stderr.write(
-            f"get_headers found {parsed_count} headers, expected {count}.\n"
-        )
+        stderr.write(f"get_headers found {parsed_count} headers, expected " \
+            "{count}.\n")
