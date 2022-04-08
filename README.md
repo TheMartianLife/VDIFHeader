@@ -2,6 +2,8 @@
 
 # VDIF Header
 
+[![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-390/) [![GPL3+](https://img.shields.io/badge/license-GPL3+-green)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+
 > :warning: **WARNING**: This project is in a pre-release state and has not yet achieved test coverage. **Use at your own risk.**
 > 
 A simple Python library for parsing and validating the format and values of **VDIF**[^1] headers in radio telescope data files.
