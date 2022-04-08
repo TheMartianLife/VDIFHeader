@@ -31,7 +31,7 @@ __version__ = "0.1"
 from os import path
 from sys import argv, stderr, stdout
 from enum import Enum
-from types import Union
+from typing import Union
 
 from vdifheader.__init__ import *
 
