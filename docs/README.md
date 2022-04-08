@@ -2,11 +2,11 @@
 
 **Contents**
 
-* [Installation instructions](/installation).
-* [API functions](/api_functions)
-* [The `VDIFHeader` class](/vdifheader)
-* [The `VDIFHeaderField` class](/vdifheaderfield)
-* [Output modes](/output_modes)
+* [Installation instructions](#installation)
+* [API functions](#api_functions)
+* [The `VDIFHeader` class](#vdifheader)
+* [The `VDIFHeaderField` class](#vdifheaderfield)
+* [Output modes](#output_modes)
 
 <a name="installation"></a>
 ## Installation
