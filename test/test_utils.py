@@ -2,7 +2,7 @@ import pytest
 
 from vdifheader._utils import *
 
-# THIS TEST WON'T WORK UNLESS GIVEN MACHINE-SPECIFIC PATHS
+# THIS TEST WON'T WORK UNLESS GIVEN YOUR MACHINE-SPECIFIC PATHS
 # @pytest.mark.fast
 # @pytest.mark.parametrize("path, absolute_path", [
 #     ("~/VDIFHeader", "/Users/mars/VDIFHeader"),

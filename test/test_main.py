@@ -1,7 +1,7 @@
 import pytest
 import vdifheader as vh
 
-# test input_files reconcilliation within os.path
+# TODO test input_files reconcilliation within os.path
 # ... absolute path
 # ... relative path
 # ... home-relative path

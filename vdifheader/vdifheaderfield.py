@@ -137,16 +137,16 @@ class VDIFHeaderField(Enum):
             VDIFHeaderField.EXTENDED_DATA_VERSION,
         ]
         if self in _simple_ints: # convert to bit string
-            return (lambda x: format(x, f"0{bit_length}b"))
+            return (lambda x: format(x, "b"))
         encoders = { # otherwise use specialised encoder
             VDIFHeaderField.REFERENCE_EPOCH: self._encoder_reference_epoch,
             VDIFHeaderField.NUM_CHANNELS: 
-                (lambda x: format(int(log2(x)), f"05b")),
+                (lambda x: format(int(log2(x)), "b")),
             VDIFHeaderField.DATA_FRAME_LENGTH: 
-                (lambda x: format(x // 8, f"024b")),
+                (lambda x: format(x // 8, "b")),
             VDIFHeaderField.DATA_TYPE: (lambda x: "0" if x == "real" else "1"),
             VDIFHeaderField.BITS_PER_SAMPLE: 
-                (lambda x: format(x - 1, f"05b")),
+                (lambda x: format(x - 1, "b")),
             VDIFHeaderField.STATION_ID:  self._encoder_station_id,
             VDIFHeaderField.EXTENDED_DATA: self._encoder_extended_data,
         }
@@ -216,7 +216,7 @@ class VDIFHeaderField(Enum):
     @property
     def _encoder_station_id(self) -> Callable:
         return (lambda x:
-            format(int(x), f"016b") if x.isnumeric() 
+            format(int(x), "b") if x.isnumeric() 
             else VDIFHeaderField._encode_ascii(x)
         )
 
@@ -263,7 +263,7 @@ class VDIFHeaderField(Enum):
     def _encode_reference_epoch(epoch: datetime) -> str:
         years = (epoch.year - 2000) * 2
         month_offset = 1 if (epoch.month == 7) else 0
-        return format(years + month_offset, "06b")
+        return format(years + month_offset, "b")
 
     @staticmethod
     def _decode_reference_epoch(raw_data: str) -> datetime:
@@ -297,7 +297,7 @@ class VDIFHeaderField(Enum):
     def _encode_ascii(ascii_string: str) -> str:
         binary_string = ""
         for character in reversed(ascii_string):
-            binary_string += format(ord(character), "08b")
+            binary_string += format(ord(character), "b")
         return binary_string
 
     @staticmethod

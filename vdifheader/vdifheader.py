@@ -287,7 +287,7 @@ class VDIFHeader:
 
     def to_inifile(self, output_filepath: str):
         """Writes file of name=value for each field in header"""
-        with open(sterilized_path(output_filepath), "w+") as output_file:
+        with open(sanitized_path(output_filepath), "w+") as output_file:
             for field_name, field_value in self.to_dict.items():
                 if type(field_value) is bool:
                     field_value = str(field_value).lower()
@@ -298,7 +298,7 @@ class VDIFHeader:
 
     def to_csv(self, output_filepath: str):
         """Writes file of field_name,field_value for each field in header"""
-        with open(sterilized_path(output_filepath), "w+") as output_file:
+        with open(sanitized_path(output_filepath), "w+") as output_file:
             output_file.write("field_name,field_value\n")
             for field_name, field_value in self.to_dict.items():
                 output_file.write(f"{field_name},{field_value}\n")
@@ -343,16 +343,19 @@ class VDIFHeader:
 
     def _try_set_field(self, field: Field, 
             new_value: Union[bool,datetime,int,str]):
-        if field not in Field.primary_values():
+        if field not in Field.primary_values(): # an assignable field
             raise ValueError("_try_set_field cannot assign value to field " \
                 f"{field.value}.")
+        if type(new_value) != field.underlying_type: # correct type of value
+            raise ValueError("_try_set_field cannot assign value of type " \
+                f"{type(new_value)} to field of type {field.underlying_type}.")         
         raw_value = switch_end(field._encoder(new_value))
-        if len(raw_value) > field._bit_length:
-            # TODO test that encode via fixed-size format string doesn't trim
+        if len(raw_value) > field._bit_length: # fits within bit space
             raise ValueError(f"Cannot assign value {new_value} to field " \
                 f"{field.value} with maximum bit length {field._bit_length}.")
+        raw_value = format(raw_value, f"0{field._bit_length}b")
         # otherwise, value is good
-        elif field.underlying_type == bool:      
+        if field.underlying_type == bool:      
             self.__bool_fields[field] = new_value
         elif field.underlying_type == datetime: 
             self.__datetime_fields[field] = new_value

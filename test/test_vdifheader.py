@@ -1,6 +1,7 @@
 import pytest
 from os import path
 from copy import deepcopy
+from datetime import datetime, timezone
 from vdifheader import VDIFHeader as Header
 from vdifheader import VDIFHeaderField as Field
 pytestmark = pytest.mark.fast
@@ -114,8 +115,9 @@ def test_vdifheader_unassigned_field_assignment_warning(cached_header, value, ra
     # assert f"WARNING: extended_data_version {value} not recognised." in _stderr
 
 
-# def test_vdifheader_reference_epoch(cached_header): # TODO "2021-07-01"
-    # TODO
+def test_vdifheader_reference_epoch(cached_header): # TODO "2021-07-01"
+    test_epoch = datetime(year=2021, month=7, day=1, tzinfo=timezone.utc)
+    assert cached_header.reference_epoch == test_epoch
 
 # def test_vdifheader_reference_epoch_assignment(cached_header, value, raw_value):
     # TODO
