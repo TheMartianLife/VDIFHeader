@@ -20,13 +20,13 @@ TODO
 get_first_header(input_filepath: str) -> Optional[VDIFHeader]
 ```
 
-Attempts to fetch first 32 bytes from file at `input_filepath`, interpret them as a VDIF header, and return a `VDIFHeader` object populated with `VDIFHeaderField` objects for each value found within the raw data. If file cannot be read, return value is `None`.
+Attempts to fetch first 32 bytes from file at `input_filepath`, interpret them as a VDIF header, and return a `VDIFHeader` object. If file cannot be read, return value is `None`.
 
 ```python
 get_headers(input_filepath: str, count: Optional[int]=None) -> Iterator[VDIFHeader]
 ```
 
-Attempts to fetch sufficient bytes from file at `input_filepath` to populate `count` `VDIFHeader` objects, each populated with `VDIFHeaderField` objects. If file cannot be read, return value is an empty list. If `count` is negative or `None`, the function will attempt to parse all headers present in the file. Note that the return type of this function is [`Iterator`](https://wiki.python.org/moin/Iterator).
+Attempts to fetch sufficient bytes from file at `input_filepath` to populate `count` `VDIFHeader` objects. If file cannot be read, return value is an empty list. If `count` is negative or `None`, the function will attempt to parse all headers present in the file. Note that the return type of this function is [`Iterator`](https://wiki.python.org/moin/Iterator).
 
 > :warning: **WARNING**: This function uses inbuilt `data_frame_length` values (specified in each header) to find subsequent headers. For example, if `header 0` says its frame is `8032 bytes` long, the function will interpet the data at `(location_of_this_header + 8032)` as the next header. This allows for warning of headers which defy the VDIF spec (which says all data frames in a file should be of equal length), but may result in error if this field of a single header is mangled.
 
@@ -36,50 +36,27 @@ Attempts to fetch sufficient bytes from file at `input_filepath` to populate `co
 **Attributes**
 
 ```python
-invalid_flag: VDIFHeaderField
-legacy_mode: VDIFHeaderField
-seconds_from_epoch: VDIFHeaderField
-unassigned_field: VDIFHeaderField
-reference_epoch: VDIFHeaderField
-data_frame_number: VDIFHeaderField
-vdif_version: VDIFHeaderField
-num_channels: VDIFHeaderField
-data_frame_length: VDIFHeaderField
-data_type: VDIFHeaderField
-bits_per_sample: VDIFHeaderField
-thread_id: VDIFHeaderField
-station_id: VDIFHeaderField
-extended_data_version: VDIFHeaderField
-extended_data: VDIFHeaderField
+invalid_flag: bool          # ideally this is always False
+legacy_mode: bool           # if True, has no extended data
+seconds_from_epoch: int     # counted forward from reference_epoch
+unassigned_field: int       # (synch code) should always be 0
+reference_epoch: datetime   # should be 01/01/20?? or 01/07/20??
+data_frame_number: int
+vdif_version: int           # should be 0 or 1
+num_channels: int
+data_frame_length: int      # should always be a multiple of 8
+data_type: str              # should be "real" or "complex"
+bits_per_sample: int        # should always be <= 32
+thread_id: int              # should be < 1024
+station_id: str             # should be 2-char ASCII or uint16
+extended_data_version: int  # should be 0x00...0x04 or 0xab
+extended_data: dict[VDIFHeaderField,Any]
 ```
-
-Attributes that represent header **fields**.
-
-```python
-warnings: list[str]
-warnings_count: int
-errors: list[str]
-errors_count: int
-```
-
-Utility attributes used for displaying aggregated information about completed validity checks.
-
-```python
-raw_data: Optional[list[str]]
-```
-
-The raw input used to construct the object, represented as a list of `8` strings where each string is a data word where the [endianness](https://en.wikipedia.org/wiki/Endianness) has been switched from little-endian (which makes sense for computers) to big-endian (which makes sense for humans accessing indices). This means that where the raw bits on disk may be `ddddddddccccccccbbbbbbbbaaaaaaaa`, the word string will be in order `aaaaaaaabbbbbbbbccccccccdddddddd`. This means that accessing e.g., word `1`, bit `23` is as easy as `raw_data[1][23]`.
-
-```python
-header_num: Optional[int]
-```
-
-Used to validate a header's `data_frame_number` based on their position in a file and the values of other headers in the same file. In debug output, `"(header {n})"` uses this number as `n`.
 
 **Functionss**
 
 ```python
-@staticmethod parse(raw_data: bytes, header_num: Optional[int]=None) -> VDIFHeader
+@staticmethod parse(raw_data: bytes) -> VDIFHeader
 ```
 
 Creates a new `VDIFHeader` object populated from values present in the `raw_data` bytes, as per the [VDIF format specification](https://vlbi.org/wp-content/uploads/2019/03/VDIF_specification_Release_1.1.1.pdf).
@@ -91,20 +68,17 @@ get_timestamp() -> datetime
 Combines the header's `reference_epoch` and `seconds_from_epoch` values into a single `datetime` object.
 
 ```python
-print_summary()
 print_raw()
 print_values()
-print_verbose()
 ```
 
 Prints the content of the header as per [output formats](/output_formats).
 
 ```python
-to_dict() -> dict[str, Union[bool, int, str]]
-get_extended_data_dict() -> dict[str, Union[bool, int, str]]
+to_dict() -> dict[str, Any]
 ```
 
-Creates `dict` of header fields as format `field_name: field_value`. The result of `to_dict()` **includes** values from `get_extended_data_dict()`, but the latter can be used in other operations to get just the fields that are not always included in a VDIF header.
+Creates `dict` of header fields as format `field_enum: field_value`. The result of `to_dict()` **includes** values from `get_extended_data_dict()`, but the latter can be used in other operations to get just the fields that are not always included in a VDIF header.
 
 ```python
 to_inifile(output_filepath: str)
