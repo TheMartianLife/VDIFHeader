@@ -39,7 +39,7 @@ except:  # else don't worry about it
     pass
 
 
-def sterilized_path(filepath: str) -> str:
+def sanitized_path(filepath: str) -> str:
     """Remove symlinks, home references, and relative segments in path"""
     return path.abspath(path.realpath(path.expanduser(filepath)))
 

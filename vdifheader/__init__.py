@@ -32,7 +32,7 @@ __version__ = "0.1"
 from sys import stderr
 from typing import Iterator, Optional
 
-from vdifheader._utils import sterilized_path
+from vdifheader._utils import sanitized_path
 from vdifheader.vdifheader import VDIFHeader
 from vdifheader.vdifheaderfield import VDIFHeaderField
 
@@ -76,7 +76,7 @@ def get_headers(input_filepath: str,
         header_limit = True
     parsed_count = 0
     # allow relative/home-relative filepaths
-    with open(sterilized_path(input_filepath), "rb") as input_file:
+    with open(sanitized_path(input_filepath), "rb") as input_file:
         raw_header = input_file.read(VDIF_HEADER_BYTES)
         # until we find the end of the file, or otherwise break
         while raw_header is not None and len(raw_header) > 0:
