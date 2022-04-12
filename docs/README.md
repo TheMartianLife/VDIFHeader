@@ -2,16 +2,10 @@
 
 **Contents**
 
-* [Installation instructions](#installation)
 * [API methods](#api_methods)
 * [The `VDIFHeader` class](#vdifheader)
 * [The `VDIFHeaderField` enum](#vdifheaderfield)
 * [Output modes](#output_modes)
-
-<a name="installation"></a>
-## Installation
-
-TODO
 
 <a name="api_methods"></a>
 ## **Top-level public API methods**

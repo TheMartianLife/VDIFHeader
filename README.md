@@ -116,3 +116,4 @@ This project is licensed under the terms of the [GNU General Public License, ver
 - [ ] Handling of Extended Data fields.
 - [ ] Write values back to valid binary header of type `bytes`.
 - [x] Output header values to formats such as ~~iniFile~~/~~csv~~/json/~~dict~~.
+- [ ] Populate appropriate README.rst and requirements.txt to index a 1.0 on PyPi.
