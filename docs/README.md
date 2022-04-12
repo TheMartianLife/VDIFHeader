@@ -26,7 +26,7 @@ Attempts to fetch first 32 bytes from file at `input_filepath`, interpret them a
 get_headers(input_filepath: str, count: Optional[int]=None) -> Iterator[VDIFHeader]
 ```
 
-Attempts to fetch sufficient bytes from file at `input_filepath` to populate `count` `VDIFHeader` objects. If file cannot be read, return value is an empty list. If `count` is negative or `None`, the method will attempt to parse all headers present in the file. Note that the return type of this method is [`Iterator`](https://wiki.python.org/moin/Iterator).
+Attempts to fetch sufficient bytes from file at `input_filepath` to populate `count` number of `VDIFHeader` objects. If file cannot be read, return value is an empty list. If `count` is negative or `None`, the method will attempt to parse all headers present in the file. Note that the return type of this method is [`Iterator`](https://wiki.python.org/moin/Iterator).
 
 > :warning: **WARNING**: This method uses inbuilt `data_frame_length` values (specified in each header) to find subsequent headers. For example, if `header 0` says its frame is `8032 bytes` long, the method will interpet the data at `(location_of_this_header + 8032)` as the next header. This allows for warning of headers which defy the VDIF spec (which says all data frames in a file should be of equal length), but may result in error if this field of a single header is mangled.
 
@@ -74,7 +74,7 @@ get_station_information() -> str
 Consults included dictionary of popular `station_id` values and returns station name and country, if known.
 
 ```python
-print_raw()
+print_binary()
 print_values()
 ```
 
@@ -119,7 +119,6 @@ Gets list of fields, where `primary_values` refers to fields that are always pre
 |:---|:---|
 | `raw` | Output original binary data |
 | `values` | Output `key: value` for each header field |
-| `verbose` | Combined `raw` and `values` |
 
 **Example output: `raw` mode**
 

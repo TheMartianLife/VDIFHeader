@@ -29,8 +29,10 @@ __maintainer__ = __author__
 __status__ = "Pre-release"
 __version__ = "0.1"
 
-from os import path
+from os import path, strerror
 from sys import stderr
+from errno import ENOENT
+from pathlib import Path
 from datetime import datetime,timezone
 
 try:  # colors if they have them
@@ -48,7 +50,7 @@ def to_utc(dt: datetime) -> datetime:
 
 def sanitized_path(filepath: str) -> str:
     """Remove symlinks, home references, and relative segments in path"""
-    return path.abspath(path.realpath(path.expanduser(filepath)))
+    return str(Path(filepath).expanduser().resolve())
 
 
 def switch_end(data: str, padded_bits: int=0) -> str:
@@ -64,6 +66,20 @@ def vh_warn(message: str):
 def vh_error(message: str):
     """Writes message to stdout in yellow text with WARNING in front"""
     stderr.write(f"\033[0;31mERROR: {message}.\033[0m\n")
+
+
+def posint(value: int) -> int:
+    int_value = int(value)
+    if int_value <= 0:
+        raise ValueError(f"NUM_HEADERS must be > 0.")
+    return int_value
+
+
+def filepath(value: str) -> str:
+    path_value = sanitized_path(value)
+    if not path.exists(path_value):
+        raise FileNotFoundError(ENOENT, strerror(ENOENT), path_value)
+    return path_value
 
 
 def station_information(station_id: str) -> str:

@@ -4,7 +4,6 @@ pytestmark = pytest.mark.fast
 
 
 # THIS TEST WON'T WORK UNLESS GIVEN YOUR MACHINE-SPECIFIC PATHS
-@pytest.mark.fast
 @pytest.mark.parametrize("path, absolute_path", [
     ("~/VDIFHeader", "/Users/mars/VDIFHeader"),
     ("./../../../mars/VDIFHeader", "/Users/mars/VDIFHeader"),
@@ -26,7 +25,7 @@ def test_utils_test_switch_end(input, switched_input):
     reason="capsys capture of stderr not working in current pytest")
 def test_utils_test_vh_warn(capsys):
     vh_warn("this is a test warning")
-    test_output = "\033[0;33mWARNING: this is a test warning.\033[0m\n"
+    test_output = "WARNING: this is a test warning."
     _stderr = capsys.readouterr().err
     assert test_output in _stderr
 
@@ -35,9 +34,20 @@ def test_utils_test_vh_warn(capsys):
     reason="capsys capture of stderr not working in current pytest")
 def test_utils_test_vh_error(capsys):
     vh_error("this is a test error")
-    test_output = "\033[0;31mERROR: this is a test error.\033[0m\n"
+    test_output = "ERROR: this is a test error."
     _stderr = capsys.readouterr().err
     assert test_output in _stderr
+
+
+@pytest.mark.parametrize("value",[1, 10000000000])
+def test_utils_posint(value):
+    assert posint(value) == value
+
+
+@pytest.mark.parametrize("value",[0, -2, -10000000000])
+def test_utils_posint_invalid(value):
+    with pytest.raises(ValueError):
+        posint(value)
 
 
 @pytest.mark.parametrize("station_id, station_info", [

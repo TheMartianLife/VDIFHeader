@@ -28,29 +28,41 @@ __maintainer__ = __author__
 __status__ = "Pre-release"
 __version__ = "0.1"
 
-from os import path, strerror
-from sys import stdout
-from errno import ENOENT
+import sys
 from enum import Enum
 from argparse import ArgumentParser
 
-from vdifheader.__init__ import *
+from vdifheader import *
+from vdifheader._utils import *
 
 
-class VDIFPrintMode(Enum):
-    NONE = "none"
-    SUMMARY = "summary"
+class VDIFOutputMode(Enum):
     VALUES = "values"
-    RAW = "raw"
-    VERBOSE = "verbose"
+    BINARY = "binary"
 
-    def __str__(self):
-        return self.value
 
-class VDIFFieldValidity(Enum):
-    UNKNOWN = 0
-    INVALID = 1
-    VALID = 2
+def arg_parser() -> ArgumentParser:
+    # parse command line args
+    parser = ArgumentParser(prog="vdifheader", 
+        description="Parse and validate VDIF headers")
+    # arguments about number of headers to parse
+    num_group = parser.add_mutually_exclusive_group()
+    num_group.add_argument("-n", "--count", dest="num_headers", 
+        metavar="NUM", type=posint, help="number of headers to parse")
+    num_group.add_argument("-a", "--all", dest="num_headers", 
+        action="store_const", const=-1, help="parse all headers in file")
+    # arguments about how to print output
+    print_group = parser.add_mutually_exclusive_group()
+    print_group.add_argument("-v", "--values", dest="output_mode", 
+        action="store_const", const=VDIFOutputMode.VALUES, 
+        help="show values output")
+    print_group.add_argument("-b", "--binary", dest="output_mode", 
+        action="store_const", const=VDIFOutputMode.BINARY, 
+        help="show raw binary output")
+    # arguments about file to process
+    parser.add_argument("input_file", metavar="INPUT_FILE", type=filepath)
+    parser.set_defaults(num_headers=1, output_mode=VDIFOutputMode.VALUES)
+    return parser
 
 
 def main():
@@ -62,109 +74,25 @@ def main():
     first_header = None
 
     # parse command line args
-    parser = ArgumentParser(description="Parse and validate VDIF headers")
-    # arguments about number of headers to parse
-    num_group = parser.add_mutually_exclusive_group()
-    num_group.add_argument("-n", "--count", dest="num_headers", 
-        metavar="NUM_HEADERS", type=int) # TODO disallow negative numbers
-    num_group.add_argument("-a", "--all", dest="num_headers", 
-        action="store_const", const=-1)
-    # arguments about how to print output
-    print_group = parser.add_mutually_exclusive_group()
-    print_group.add_argument("-v", "--verbose", dest="print_mode", 
-        action="store_const", const=VDIFPrintMode.VERBOSE)
-    print_group.add_argument("-s", "--silent", dest="print_mode", 
-        action="store_const", const=VDIFPrintMode.NONE)
-    print_group.add_argument("-p", "--print", dest="print_mode", 
-        metavar="INPUT_FILES", type=VDIFPrintMode, choices=list(VDIFPrintMode))
-    # arguments about files to process
-    parser.add_argument("input_files", nargs="+") # TODO validate input
-    parser.set_defaults(num_headers=1, print_mode=VDIFPrintMode.SUMMARY)
+    args = vars(arg_parser().parse_args())
 
+    num_headers = args["num_headers"]
+    output_mode = args["output_mode"]
+    input_file = args["input_file"]
 
-
-
-    test_args_string1 = "-n 10 --verbose ~/test_data/m0921_Mp_264_042000.vdif"
-    args = parser.parse_args(test_args_string1)
-    print(args)
-
-    test_args_string2 = "-n --p empty ../../m0921_Mp_264_042000.vdif"
-    args = parser.parse_args(test_args_string2)   
-    print(args)
-
-    test_args_string3 = "--all --verbose ../../m0921_Mp_264_04200.vdif"
-    args = parser.parse_args(test_args_string3) 
-    print(args)
-
-    test_args_string4 = "-n 10 --all --verbose"
-    args = parser.parse_args(test_args_string4) 
-    print(args)
-
-    # get and validate arguments
-    # args = __parse_args(argv[1:])
-    # if "show_help" in args:
-    #     __show_help()
-    #     return
-    # elif "input_filepath" not in args:
-    #     # nothing we can do then (shrug)
-    #     __show_usage()
-    #     return
-
-    # num_warnings = 0
-    # num_errors = 0
-
-    # # values that should match between headers
-    # checks = {
-    #     "data_header_lengths": set(),
-    #     "data_frame_lengths": set(),
-    #     "channel_counts": set(),
-    #     "bit_counts": set(),
-    #     "station_ids": set(),
-    # }
-
-    # get some headers
-    # for header in get_headers(args["input_filepath"], args["num_headers"]):
-    #     headers.append(header)
-    #     # TODO set expected value of supposedly matching fields
-    #     if first_header is None:
-    #         first_header = header
-
-        # TODO remove
-        # header.set_expected_value("station_id", "Tt")
-        # header.revalidate()
+    for header in get_headers(input_file, count=num_headers):
         # save first header if this is it
-        # print requested output about this header
-        # __print_header_output(header, args["print_mode"])
-        # # add to total warnings and errors from each header
-        # num_warnings += header.warnings_count
-        # num_errors += header.errors_count
-        # check values that should match between headers
-        # header_length = 16 if header.legacy_mode else 32
-        # checks["data_header_lengths"].add(header_length)
-        # checks["data_frame_lengths"].add(header.data_frame_length)
-        # checks["channel_counts"].add(header.num_channels)
-        # checks["bit_counts"].add(header.bits_per_sample)
-        # checks["station_ids"].add(header.station_id)
-    # file-wide warnings about non-matching fields between headers
-    # for key, value in checks.items():
-    #     if len(value) > 1:
-    #         message = f"ERROR: value {key} did not match between headers."
-    #         stderr.write(colorify(message))
-    #         num_errors += 1
-    # show total errors and warnings
-    # if args["print_mode"] != _VDIFPrintMode.NONE:
-    #     stdout.write(f"{num_errors} errors, {num_warnings} warnings " \
-    #         "generated.\n")
-    # stdout.write(f"Parsed {len(headers)} headers.")
+        if first_header is None:
+            first_header = header
+        # show requested output
+        if output_mode == VDIFOutputMode.VALUES:
+            header.print_values()
+        elif output_mode == VDIFOutputMode.BINARY:
+            header.print_binary()
+        # print a blank line between separate headers
+        if num_headers > 1:
+            print()
     return
-
-def __check_input_filepath_arg(parser, arg):
-    filepath = path.expanduser(arg) # resolve ~ relativity if present
-    filepath = path.realpath(filepath) # resolve ./ relativity if present
-    filepath = path.normpath(filepath) # compresses any remaining ../ relativity
-    if not path.exists(filepath):
-        raise FileNotFoundError(ENOENT, strerror(ENOENT), filepath)
-    return open(filepath, "rb")
 
 
 if __name__ == "__main__":

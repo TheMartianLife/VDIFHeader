@@ -247,7 +247,6 @@ class VDIFHeader:
 
     @station_id.setter
     def station_id(self, value: str):
-        # TODO further semantic validation here?
         if type(value) == str:
             if value.isnumeric() and int(value) // 256 >= 0x30:
                 raise ValueError("numeric station_id first bit must be < 0x30.")
@@ -278,7 +277,7 @@ class VDIFHeader:
     @extended_data.setter
     def extended_data(self, new_value: dict[Field,Any]):
         raise NotImplementedError("Cannot directly set extended_data value.")
-        return # TODO implement this
+        # TODO implement this
 
     @property
     def to_dict(self) -> dict[Field,Any]:
@@ -337,11 +336,11 @@ class VDIFHeader:
         self.__print_extended_data_values()
         return
 
-    def print_raw(self):
+    def print_binary(self):
         column_nums = "".join([f"     Byte {n}    |" for n in [3, 2, 1, 0]])
         stdout.write(f"       |{column_nums}\n")
         for word in range(8):
-            self.__print_raw_word(word)
+            self.__print_binary_word(word)
         return
 
     ######## PRIVATE METHODS
@@ -407,7 +406,7 @@ class VDIFHeader:
         self.__extended_data_fields = extended_data
         return
 
-    def __print_raw_word(self, word_num: int):
+    def __print_binary_word(self, word_num: int):
         word_content = ""
         word_fields = []
         if word_num == 0:

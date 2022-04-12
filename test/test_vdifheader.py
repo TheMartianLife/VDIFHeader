@@ -68,7 +68,7 @@ def test_vdifheader_print_values(cached_header, capsys):
 
 @pytest.mark.skipif(os.environ.get("CAPSYS_WORKING") != "True",
     reason="capsys capture of stdout not working in current pytest")
-def test_vdifheader_print_raw(cached_header, capsys):
+def test_vdifheader_print_binary(cached_header, capsys):
     output = ["       |     Byte 3    |     Byte 2    |     Byte 1    |     Byte 0    |",
         "Word 0 |0|0|0 0 0 0 1 1 1 1 1 1 1 0 1 0 1 0 0 0 1 1 0 1 1 0 0 0 0 0 0 0|",
         "Word 1 |0 0|1 1 0 1 0 1|0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0|",
@@ -78,6 +78,6 @@ def test_vdifheader_print_raw(cached_header, capsys):
         "Word 5 |0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0|",
         "Word 6 |0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0|",
         "Word 7 |0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0|"]
-    cached_header.print_raw()
+    cached_header.print_binary()
     _stdout = capsys.readouterr().out
     assert _stdout == "\n".join(output)

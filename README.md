@@ -8,7 +8,7 @@
 
 A simple Python library for parsing and validating the format and values of **VDIF**[^1] headers in radio telescope data files.
 
-When you work in the domain of VLBI astronomy or space domain awareness, you are forever relying on data files which are difficult to examine. So whenever you work on software that interprets it, you have to wonder every time it crashes whether it is the software or you. 
+When you work in the domain of VLBI astronomy or space domain awareness, you are forever relying on large binary data files which are difficult to examine. So whenever you work on software that interprets it, you have to wonder every time it crashes whether it is the software or you. 
 
 With this library, it's quick to inspect header values and you'll see printed warnings whenever something's awry. It's great for when you want to quickly check why [mark5access](https://safe.nrao.edu/wiki/bin/view/VLBA/Software#DiFX) is yelling at you, but if you need the actual frame content—or want to do more complex stuff with VDIF data in Python—you probably want to use [baseband](https://github.com/mhvk/baseband) instead.
 
@@ -52,7 +52,8 @@ first_header.to_csv(output_filepath='./some_input_file_vdif.csv')
 ```
 Output:
 ```
-ERROR: reference epoch is in the future (header 4).
+ERROR: unassigned_field value should always be 0.
+WARNING: vdif_version value > 1 not recognised.
 
 Parsed 5 starting at: 2021-09-21 04:20:00+00:00
 Source station: Moprah, Australia
@@ -68,13 +69,19 @@ When run as a script, simply specify a file to validate and any additional confi
 
 ```
 % python -m vdifheader -h
-usage: vdifheader [options] [file]
-  options:
-    -h, --help		    show help
-    -n --count [number]	number of headers to parse (default=1)
-    -a --all		    parse all headers in file
-    -v --values         show values output
-    -b --binary		    show raw binary output
+usage: vdifheader [-h] [-n NUM | -a] [-v | -b] INPUT_FILE
+
+Parse and validate VDIF headers
+
+positional arguments:
+  INPUT_FILE
+
+optional arguments:
+  -h, --help           show this help message and exit
+  -n NUM, --count NUM  number of headers to parse
+  -a, --all            parse all headers in file
+  -v, --values         show values output
+  -b, --binary         show raw binary output
 %
 % python -m vdifheader some_input_file.vdif
 ERROR: unassigned_field value should always be 0.
