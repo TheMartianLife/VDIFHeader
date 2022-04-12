@@ -53,12 +53,32 @@ class VDIFHeader:
                 "instatiated. Values must be extracted using factory method " \
                 "VDIFHeader.parse().")
         # raw binary data
-        self.__raw_values: dict[str,str] = {}
+        self.__raw_values: dict[str,str] = {
+            Field.EXTENDED_DATA: "",
+        }
         # actual field values
-        self.__bool_fields: dict[Field,bool] = {}
-        self.__datetime_fields: dict[Field,datetime] = {}
-        self.__int_fields: dict[Field,int] = {}
-        self.__str_fields: dict[Field,str] = {}
+        self.__bool_fields: dict[Field,bool] = {
+            Field.INVALID_FLAG: False, 
+            Field.LEGACY_MODE: False,
+        }
+        self.__datetime_fields: dict[Field,datetime] = {
+            Field.REFERENCE_EPOCH: to_utc(datetime(2000, 1, 1)),
+        }
+        self.__int_fields: dict[Field,int] = {
+            Field.SECONDS_FROM_EPOCH: 0, 
+            Field.UNASSIGNED_FIELD: 0, 
+            Field.DATA_FRAME_NUMBER: 0, 
+            Field.VDIF_VERSION: 0, 
+            Field.NUM_CHANNELS: 1, 
+            Field.DATA_FRAME_LENGTH: 8032, 
+            Field.BITS_PER_SAMPLE: 1, 
+            Field.THREAD_ID: 0,
+            Field.EXTENDED_DATA_VERSION: 0,
+        }
+        self.__str_fields: dict[Field,str] = {
+            Field.DATA_TYPE: "real", 
+            Field.STATION_ID: "0",
+        }
         self.__extended_data_fields: dict[Field,type] = {}
         return
 
@@ -68,24 +88,25 @@ class VDIFHeader:
         header = VDIFHeader(valid_caller=True)
         binary_data = VDIFHeader._preprocess(raw_data)
         # set each of the boolean fields
-        bool_fields = [Field.INVALID_FLAG, Field.LEGACY_MODE]
-        for field in bool_fields:
-            header._try_set_field(field, field._from(binary_data))
+        header.invalid_flag = Field.INVALID_FLAG._from(binary_data)
+        header.legacy_mode = Field.LEGACY_MODE._from(binary_data)
         # now datetime fields
-        datetime_fields = [Field.REFERENCE_EPOCH]
-        for field in datetime_fields:
-            header._try_set_field(field, field._from(binary_data))
+        header.reference_epoch = Field.REFERENCE_EPOCH._from(binary_data)
         # now integer fields
-        int_fields = [Field.SECONDS_FROM_EPOCH, Field.UNASSIGNED_FIELD, 
-            Field.DATA_FRAME_NUMBER, Field.VDIF_VERSION, Field.NUM_CHANNELS, 
-            Field.DATA_FRAME_LENGTH, Field.BITS_PER_SAMPLE, Field.THREAD_ID,
-            Field.EXTENDED_DATA_VERSION]
-        for field in int_fields:
-            header._try_set_field(field, field._from(binary_data))
+        header.seconds_from_epoch = Field.SECONDS_FROM_EPOCH._from(binary_data)
+        header.unassigned_field = Field.UNASSIGNED_FIELD._from(binary_data)
+        header.data_frame_number = Field.DATA_FRAME_NUMBER._from(binary_data)
+        header.vdif_version = Field.VDIF_VERSION._from(binary_data)
+        header.num_channels = Field.NUM_CHANNELS._from(binary_data)
+        header.data_frame_length = Field.DATA_FRAME_LENGTH._from(binary_data)
+        header.bits_per_sample = Field.BITS_PER_SAMPLE._from(binary_data)
+        header.thread_id = Field.THREAD_ID._from(binary_data)
+        edv = Field.EXTENDED_DATA_VERSION._from(binary_data)
+        header.extended_data_version = edv
         # now string fields
-        str_fields = [Field.DATA_TYPE, Field.STATION_ID]
-        for field in str_fields:
-            header._try_set_field(field, field._from(binary_data))
+        header.data_type = Field.DATA_TYPE._from(binary_data)
+        header.station_id = Field.STATION_ID._from(binary_data)
+        # now extended_data
         header.__extended_data_fields = Field.EXTENDED_DATA._from(binary_data)
         raw_extended_data = Field.EXTENDED_DATA._raw_from(binary_data)
         header.__raw_values[Field.EXTENDED_DATA] = raw_extended_data
