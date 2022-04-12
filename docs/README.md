@@ -3,9 +3,9 @@
 **Contents**
 
 * [Installation instructions](#installation)
-* [API functions](#api_functions)
+* [API methods](#api_methods)
 * [The `VDIFHeader` class](#vdifheader)
-* [The `VDIFHeaderField` class](#vdifheaderfield)
+* [The `VDIFHeaderField` enum](#vdifheaderfield)
 * [Output modes](#output_modes)
 
 <a name="installation"></a>
@@ -13,8 +13,8 @@
 
 TODO
 
-<a name="api_functions"></a>
-## **Top-level public API functions**
+<a name="api_methods"></a>
+## **Top-level public API methods**
 
 ```python
 get_first_header(input_filepath: str) -> Optional[VDIFHeader]
@@ -26,9 +26,9 @@ Attempts to fetch first 32 bytes from file at `input_filepath`, interpret them a
 get_headers(input_filepath: str, count: Optional[int]=None) -> Iterator[VDIFHeader]
 ```
 
-Attempts to fetch sufficient bytes from file at `input_filepath` to populate `count` `VDIFHeader` objects. If file cannot be read, return value is an empty list. If `count` is negative or `None`, the function will attempt to parse all headers present in the file. Note that the return type of this function is [`Iterator`](https://wiki.python.org/moin/Iterator).
+Attempts to fetch sufficient bytes from file at `input_filepath` to populate `count` `VDIFHeader` objects. If file cannot be read, return value is an empty list. If `count` is negative or `None`, the method will attempt to parse all headers present in the file. Note that the return type of this method is [`Iterator`](https://wiki.python.org/moin/Iterator).
 
-> :warning: **WARNING**: This function uses inbuilt `data_frame_length` values (specified in each header) to find subsequent headers. For example, if `header 0` says its frame is `8032 bytes` long, the function will interpet the data at `(location_of_this_header + 8032)` as the next header. This allows for warning of headers which defy the VDIF spec (which says all data frames in a file should be of equal length), but may result in error if this field of a single header is mangled.
+> :warning: **WARNING**: This method uses inbuilt `data_frame_length` values (specified in each header) to find subsequent headers. For example, if `header 0` says its frame is `8032 bytes` long, the method will interpet the data at `(location_of_this_header + 8032)` as the next header. This allows for warning of headers which defy the VDIF spec (which says all data frames in a file should be of equal length), but may result in error if this field of a single header is mangled.
 
 <a name="vdifheader"></a>
 ## **Module classes: `VDIFHeader`**
@@ -40,7 +40,7 @@ invalid_flag: bool          # ideally this is always False
 legacy_mode: bool           # if True, has no extended data
 seconds_from_epoch: int     # counted forward from reference_epoch
 unassigned_field: int       # (synch code) should always be 0
-reference_epoch: datetime   # should be 01/01/20?? or 01/07/20??
+reference_epoch: datetime   # should be 01/01/20?? or 01/07/20?? in UTC
 data_frame_number: int
 vdif_version: int           # should be 0 or 1
 num_channels: int
@@ -53,7 +53,7 @@ extended_data_version: int  # should be 0x00...0x04 or 0xab
 extended_data: dict[VDIFHeaderField,Any]
 ```
 
-**Functionss**
+**Methods**
 
 ```python
 @staticmethod parse(raw_data: bytes) -> VDIFHeader
@@ -68,6 +68,12 @@ get_timestamp() -> datetime
 Combines the header's `reference_epoch` and `seconds_from_epoch` values into a single `datetime` object.
 
 ```python
+get_station_information() -> str
+```
+
+Consults included dictionary of popular `station_id` values and returns station name and country, if known.
+
+```python
 print_raw()
 print_values()
 ```
@@ -78,7 +84,7 @@ Prints the content of the header as per [output formats](/output_formats).
 to_dict() -> dict[str, Any]
 ```
 
-Creates `dict` of header fields as format `field_enum: field_value`. The result of `to_dict()` **includes** values from `get_extended_data_dict()`, but the latter can be used in other operations to get just the fields that are not always included in a VDIF header.
+Creates `dict` of header fields as format `field_enum: field_value`. The result of `to_dict()` **includes** values from `extended_data`, but the latter can be used in other operations to get just the fields that are not always included in a VDIF header.
 
 ```python
 to_inifile(output_filepath: str)
@@ -88,42 +94,32 @@ to_csv(output_filepath: str)
 Sends header field names and field values to the output file in the requested format. Here, `inifile` format is `{field_name}={field_value}\n` and `csv` includes column names `field_name` and `field_value`. Fields from extended data are only included if the extended data version is valid, the extended data format is known, and the value is set.
 
 <a name="vdifheaderfield"></a>
-## **Module classes: `VDIFHeaderField`**
+## **Module enum: `VDIFHeaderField`**
 
 **Attributes**
 
 ```python
-value: Union[bool, int, str]
+data_type: type # expected type for this field's value
 ```
 
-The human-interpretable value of the field. In the case of `reference_epoch`, the string represents an [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) date value. 
-
-> :warning: **WARNING**: In the case of `extended_data` this string is an aggregate value and should not be used; instead, the parent `VDIFHeader`'s `get_extended_data_dict()` should be used to fetch specific values, after checking for their presence.
+**Static (class) methods**
 
 ```python
-raw_value: str
+primary_values() -> list[VDIFHeaderField]
+optional_values() -> list[VDIFHeaderField]
+all_values() -> list[VDIFHeaderField]
 ```
+Gets list of fields, where `primary_values` refers to fields that are always present and fixed-size (fields from the [VDIF format specification](https://vlbi.org/wp-content/uploads/2019/03/VDIF_specification_Release_1.1.1.pdf), minus `extended_data`), `optional_values` refers to fields that may be included from interpretation of `extended_data`, and `all_values` combines the two (includes both `extended_data` and any fields populated from it).
 
-A string representing the bits from the parent `VDIFHeader`'s `raw_data` that correspond to (and were used to form) this value. 
-
-> :warning: **WARNING**: This is not guaranteed to match (or be convertible to) `value`, as some fields undergo transformation after read. For example, the `num_channels` field, where the resulting `value` is `2 ** (raw_value)`; or `station_id`, where the field may or may not be converted to [ASCII](https://en.wikipedia.org/wiki/ASCII) depending on the `raw_value`.
-
-```python
-validity: Validity
-```
-
-An `enum` value of type `Validity`, where possible values are `VALID`, `INVALID`, or `UNKNOWN`.
 
 <a name="output_modes"></a>
 ## Output Modes
 
 | Option | Description |
 |:---|:---|
-| `none` | No output (only show process errors) |
 | `raw` | Output original binary data |
 | `values` | Output `key: value` for each header field |
-| `summary` | Output validation warnings and errors |
-| `verbose` | Combined `raw`, `values`, and `summary` |
+| `verbose` | Combined `raw` and `values` |
 
 **Example output: `raw` mode**
 
@@ -155,11 +151,4 @@ Bits per sample: 2 bit(s)
 Thread ID: 0
 Station ID: Tt
 Extended data version: 0
-```
-
-**Example output: `summary` mode**
-
-```
-WARNING: station id not in known list (header 0).
-0 errors, 1 warnings generated.
 ```

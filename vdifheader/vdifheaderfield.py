@@ -33,7 +33,7 @@ from math import log2, pow
 from datetime import datetime, timezone
 from typing import Any, Callable, Tuple, Union
 
-from vdifheader._utils import switch_end
+from vdifheader._utils import switch_end, to_utc
 
 WORD_BITS = 32      # number of bits in a word
 ED_START = 128      # start bit of extended data field
@@ -77,7 +77,7 @@ class VDIFHeaderField(Enum):
     ######## PUBLIC PROPERTIES
 
     @property
-    def underlying_type(self) -> type:
+    def data_type(self) -> type:
         bool_fields = [VDIFHeaderField.INVALID_FLAG, 
             VDIFHeaderField.LEGACY_MODE]
         if self in bool_fields: return bool
@@ -172,9 +172,9 @@ class VDIFHeaderField(Enum):
         ]
         if self in _simple_ints: # convert straight to int at base 2
             return (lambda x: int(x, 2))
-        encoders = { # otherwise use specialised encoder
+        decoders = { # otherwise use specialised encoder
             VDIFHeaderField.REFERENCE_EPOCH: self._decoder_reference_epoch,
-            VDIFHeaderField.NUM_CHANNELS: (lambda x: pow(2, int(x, 2))),
+            VDIFHeaderField.NUM_CHANNELS: (lambda x: int(pow(2, int(x, 2)))),
             VDIFHeaderField.DATA_FRAME_LENGTH: (lambda x: int(x, 2) * 8),
             VDIFHeaderField.DATA_TYPE: 
                 (lambda x: "complex" if int(x) == 1 else "real"),
@@ -182,7 +182,7 @@ class VDIFHeaderField(Enum):
             VDIFHeaderField.STATION_ID: self._decoder_station_id,
             VDIFHeaderField.EXTENDED_DATA: self._decoder_extended_data,
         }
-        return encoders[self]
+        return decoders[self]
 
     @property
     def _header_position(self) -> Tuple[int,int]:
@@ -223,7 +223,7 @@ class VDIFHeaderField(Enum):
     @property
     def _decoder_station_id(self) -> Callable:
         return (lambda x:
-            f"{int(x)}" if int(x[-8:], 2) == 48
+            f"{int(x)}" if int(x[-8:], 2) < 48
             else VDIFHeaderField._decode_ascii(x)
         )
 
@@ -261,8 +261,9 @@ class VDIFHeaderField(Enum):
 
     @staticmethod
     def _encode_reference_epoch(epoch: datetime) -> str:
-        years = (epoch.year - 2000) * 2
-        month_offset = 1 if (epoch.month == 7) else 0
+        _epoch = to_utc(epoch)
+        years = (_epoch.year - 2000) * 2
+        month_offset = 1 if (_epoch.month == 7) else 0
         return format(years + month_offset, "b")
 
     @staticmethod
@@ -297,7 +298,7 @@ class VDIFHeaderField(Enum):
     def _encode_ascii(ascii_string: str) -> str:
         binary_string = ""
         for character in reversed(ascii_string):
-            binary_string += format(ord(character), "b")
+            binary_string += format(ord(character), "08b")
         return binary_string
 
     @staticmethod

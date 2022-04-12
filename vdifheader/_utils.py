@@ -1,5 +1,5 @@
 # > vdifheader - __utils__.py
-# Defines utility functions for tasks such as bit and color manipulation
+# Defines utility methods for tasks such as bit and color manipulation
 
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -14,7 +14,7 @@
 
 """
 > vdifheader - __utils__.py (private)
-Defines utility functions for tasks such as bit and color manipulation
+Defines utility methods for tasks such as bit and color manipulation
 """
 __author__ = "Mars Buttfield-Addison"
 __authors__ = [__author__]
@@ -31,6 +31,7 @@ __version__ = "0.1"
 
 from os import path
 from sys import stderr
+from datetime import datetime,timezone
 
 try:  # colors if they have them
     import colorama
@@ -38,15 +39,21 @@ try:  # colors if they have them
 except:  # else don't worry about it
     pass
 
+def to_utc(dt: datetime) -> datetime:
+    if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
+        # add timezone to datetime that has none
+        return dt.replace(tzinfo=timezone.utc)
+    # otherwise convert from potentially other timezone to correct one
+    return dt.astimezone(timezone.utc)
 
 def sanitized_path(filepath: str) -> str:
     """Remove symlinks, home references, and relative segments in path"""
     return path.abspath(path.realpath(path.expanduser(filepath)))
 
 
-def switch_end(data: str) -> str:
+def switch_end(data: str, padded_bits: int=0) -> str:
     """Reverse bits to deal with endianness issues"""
-    return "".join(reversed(data))
+    return "".join(reversed(data)).ljust(padded_bits, "0")
 
 
 def vh_warn(message: str):

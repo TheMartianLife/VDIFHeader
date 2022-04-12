@@ -9,6 +9,8 @@ import vdifheader as vh
 # ... escaped path
 # ... path with sh vars
 
-# test handling of multiple values in input_files
+# TODO test handling of command line args
+
+# TODO test handling of multiple values in input_files
 # ... run on each
 # ... warn/error on invalid, but retain prior valid results

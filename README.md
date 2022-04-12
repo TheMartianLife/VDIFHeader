@@ -2,28 +2,32 @@
 
 # VDIF Header
 
-[![Python 3.9](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/) [![GPL3+](https://img.shields.io/badge/license-GPL3+-green)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![Python 3.6](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-360/) [![GPL3+](https://img.shields.io/badge/license-GPL3+-blue)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
-> :warning: **WARNING**: This project is in a pre-release state and has not yet achieved test coverage. **Use at your own risk.**
-> 
+> :warning: **WARNING**: this software is in a pre-release state. Installation can only be done by downloading and running as a local module, and test coverage is not guaranteed.
+
 A simple Python library for parsing and validating the format and values of **VDIF**[^1] headers in radio telescope data files.
 
-Made because when you work in the domain of VLBI astronomy or space domain awareness, you are forever relying on data files which are themselves difficult to examine. So whenever you work on software that interprets it, you have to wonder every time it crashes whether it is the software or you. With this library, it's quick to inspect header values and you'll see printed warnings whenever something's awry.
+When you work in the domain of VLBI astronomy or space domain awareness, you are forever relying on data files which are difficult to examine. So whenever you work on software that interprets it, you have to wonder every time it crashes whether it is the software or you. 
+
+With this library, it's quick to inspect header values and you'll see printed warnings whenever something's awry. It's great for when you want to quickly check why [mark5access](https://safe.nrao.edu/wiki/bin/view/VLBA/Software#DiFX) is yelling at you, but if you need the actual frame content—or want to do more complex stuff with VDIF data in Python—you probably want to use [baseband](https://github.com/mhvk/baseband) instead.
 
 [^1]: VLBI Data Interchange Format (source: [vlbi.org](https://vlbi.org/wp-content/uploads/2019/03/VDIF_specification_Release_1.1.1.pdf))
 
 ## Usage
 
+This shows minimal working examples for different usage modes. For more detailed usage information, see the [vdifheader documentation](/docs).
+
 ### As a Package
 
-When imported as a package, users have access to two main functions:
+When imported as a package, users have access to two main methods:
 
-* `get_first_header(input_filepath)` - function returns the first header in the provided file as a `VDIFHeader` object.
-* `get_headers(input_filepath, count=None)` - iterator function returns the first `count` headers in the provided file, as a **iterator**[^2] of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse all headers found in the file. 
+* `get_first_header(input_filepath)` - method returns the first header in the provided file as a `VDIFHeader` object.
+* `get_headers(input_filepath, count=None)` - iterator method returns the first `count` headers in the provided file, as a **iterator**[^2] of `VDIFHeader` objects. If `count` is negative, zero or `None`, default behaviour is to parse all headers found in the file. 
 
 > :brain: **REMEMBER**: Python iterators are very fast for large input, but are consumed if operated on. So if you write `output = some_iterator()` and then iterate over `output` (e.g. `for item in output`), the output will now be empty.
 
-[^2]: Iterators in Python are a type of function that *generates* a result, rather than *returns* a result. For operating over potentially large input, this means not waiting for the whole thing to be loaded into memory before starting work (see: [wiki.python.org](https://wiki.python.org/moin/Iterator)).
+[^2]: Iterators in Python are a type of method that *generates* a result, rather than *returns* a result. For operating over potentially large input, this means not waiting for the whole thing to be loaded into memory before starting work (see: [wiki.python.org](https://wiki.python.org/moin/Iterator)).
 
 ```python
 import vdifheader as vh
@@ -66,11 +70,11 @@ When run as a script, simply specify a file to validate and any additional confi
 % python -m vdifheader -h
 usage: vdifheader [options] [file]
   options:
-    -h, --help		show help
-    -n --count [number]	number of headers to parse (default=all)
-    -a --all		parse all headers in file
-    -v --values     show values output
-    -b --binary		show raw binary output
+    -h, --help		    show help
+    -n --count [number]	number of headers to parse (default=1)
+    -a --all		    parse all headers in file
+    -v --values         show values output
+    -b --binary		    show raw binary output
 %
 % python -m vdifheader some_input_file.vdif
 ERROR: unassigned_field value should always be 0.
@@ -89,18 +93,12 @@ When passing `-i` to the Python interpreter, the provided script will run but le
 ERROR: unassigned_field value should always be 0.
 WARNING: vdif_version value > 1 not recognised.
 >>> first_header.station_id
-Hb
+Mp
 >>> len(headers)
 5
 ```
 
 For detailed usage information, see the [vdifheader documentation](/docs).
-
-## Dependencies
-
-> :warning: **WARNING**: This package uses type hinting from **Python 3.9** and above.
-
-The only required dependencies are within the Python standard library except for one optional dependency: `colorama`. If installed, this package enables colored debug output.
 
 ## License
 
@@ -111,4 +109,3 @@ This project is licensed under the terms of the [GNU General Public License, ver
 - [ ] Handling of Extended Data fields.
 - [ ] Write values back to valid binary header of type `bytes`.
 - [x] Output header values to formats such as ~~iniFile~~/~~csv~~/json/~~dict~~.
-- [ ] Extensible (i.e. define-your-own) field validity constraints.

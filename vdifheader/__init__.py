@@ -1,5 +1,5 @@
 # > vdifheader - __init__.py
-# Defines publicly acessible API functions for the vdifheader package
+# Defines publicly acessible API methods for the vdifheader package
 
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -13,9 +13,9 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 """
 > vdifheader - __init__.py (private)
-Defines publicly acessible API functions for the vdifheader package
+Defines publicly acessible API methods for the vdifheader package
 """
-__all__ = ["get_first_header", "get_headers", "VDIFHeader", "Validity"]
+__all__ = ["get_first_header", "get_headers", "VDIFHeader"]
 __author__ = "Mars Buttfield-Addison"
 __authors__ = [__author__]
 __contact__ = "hello@themartianlife.com"

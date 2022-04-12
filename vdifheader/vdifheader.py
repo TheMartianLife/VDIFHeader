@@ -28,7 +28,7 @@ __maintainer__ = __author__
 __status__ = "Pre-release"
 __version__ = "0.1"
 
-from os import path
+from math import log2
 from sys import stdout
 from datetime import datetime, timedelta
 from typing import Any, Union
@@ -37,9 +37,7 @@ from vdifheader._utils import *
 from vdifheader.vdifheaderfield import VDIFHeaderField as Field
 
 
-FRAME_LIMIT = 134217728 # max value for data frame limit as per spec
 HIGHEST_VERSION = 1     # highest vdif version that is recognised
-THREAD_LIMIT = 1024     # max value for thread id as per spec
 WORD_BYTES = 4          # number of bytes in a word
 WORD_BITS = 32          # number of bits in a word
 HEADER_WORDS = 8        # number of words in a (non-legacy) header
@@ -53,7 +51,7 @@ class VDIFHeader:
         if not valid_caller:
             raise NotImplementedError("VDIFHeader object cannot be directly " \
                 "instatiated. Values must be extracted using factory method " \
-                "VDIFHeader.parse()")
+                "VDIFHeader.parse().")
         # raw binary data
         self.__raw_values: dict[str,str] = {}
         # actual field values
@@ -132,7 +130,7 @@ class VDIFHeader:
 
     @unassigned_field.setter
     def unassigned_field(self, value: int):
-        if value != 0:
+        if type(value) == int and value != 0:
             vh_error("unassigned_field value should always be 0")
         self._try_set_field(Field.UNASSIGNED_FIELD, value)
         return
@@ -144,12 +142,17 @@ class VDIFHeader:
 
     @reference_epoch.setter
     def reference_epoch(self, value: datetime):
-        now = datetime.now()
-        if value > now:
-            vh_error("reference_epoch cannot be in the future")
-        if value.month not in [1, 7]:
-            vh_warn("reference_epoch expects 1st Jan or 1st Jul as date")
-        self._try_set_field(Field.REFERENCE_EPOCH, value)
+        now = to_utc(datetime.now())
+        _value = value
+        if type(value) == datetime:
+            _value = to_utc(value)
+            if _value > now:
+                vh_warn("reference_epoch should not be in the future")
+            if _value.year < 2000:
+                raise ValueError("reference_epoch can only be post-2000.")
+            if _value.month not in [1, 7] or _value.day != 1:
+                raise ValueError("reference_epoch can only be Jan or Jul 1st.")
+        self._try_set_field(Field.REFERENCE_EPOCH, _value)
         return
 
     @property
@@ -169,7 +172,7 @@ class VDIFHeader:
 
     @vdif_version.setter
     def vdif_version(self, value: int):
-        if value > HIGHEST_VERSION:
+        if type(value) == int and value > HIGHEST_VERSION:
             vh_warn(f"vdif_version value > {HIGHEST_VERSION} not recognised")
         self._try_set_field(Field.VDIF_VERSION, value)
         return
@@ -181,6 +184,8 @@ class VDIFHeader:
 
     @num_channels.setter
     def num_channels(self, value: int):
+        if type(value) == int and not log2(value).is_integer():
+            raise ValueError(f"num_channels must be power of 2.")
         self._try_set_field(Field.NUM_CHANNELS, value)
         return
 
@@ -191,8 +196,12 @@ class VDIFHeader:
 
     @data_frame_length.setter
     def data_frame_length(self, value: int):
-        if value > FRAME_LIMIT:
-            vh_error(f"data_frame_length > {FRAME_LIMIT} not allowed")
+        if type(value) == int:
+            min_length = 16 if self.legacy_mode else 32
+            if value < min_length:
+                raise ValueError(f"data_frame_length must be > {min_length}.")
+            elif value % 8 != 0:
+                raise ValueError("data_frame_length must be multiple of 8.")
         self._try_set_field(Field.DATA_FRAME_LENGTH, value)
         return
 
@@ -203,7 +212,7 @@ class VDIFHeader:
 
     @data_type.setter
     def data_type(self, value: str):
-        if value != "real" and value != "complex":
+        if type(value) == str and value != "real" and value != "complex":
             raise ValueError(f"Cannot assign value {value} to field " \
                 f"data_type with expected values=['real'|'complex'].") 
         self._try_set_field(Field.DATA_TYPE, value)
@@ -216,6 +225,8 @@ class VDIFHeader:
 
     @bits_per_sample.setter
     def bits_per_sample(self, value: int):
+        if type(value) == int and value < 1:
+            raise ValueError("bits_per_sample must be >= 1.")
         self._try_set_field(Field.BITS_PER_SAMPLE, value)
         return
 
@@ -226,8 +237,6 @@ class VDIFHeader:
 
     @thread_id.setter
     def thread_id(self, value: int):
-        if value > THREAD_LIMIT:
-            vh_error(f"thread_id > {THREAD_LIMIT} not allowed")
         self._try_set_field(Field.THREAD_ID, value)
         return
 
@@ -239,6 +248,11 @@ class VDIFHeader:
     @station_id.setter
     def station_id(self, value: str):
         # TODO further semantic validation here?
+        if type(value) == str:
+            if value.isnumeric() and int(value) // 256 >= 0x30:
+                raise ValueError("numeric station_id first bit must be < 0x30.")
+            elif not value.isnumeric() and len(value) != 2:
+                raise ValueError("ASCII station_id length must be 2 chars.")
         self._try_set_field(Field.STATION_ID, value)
         return
 
@@ -263,11 +277,12 @@ class VDIFHeader:
 
     @extended_data.setter
     def extended_data(self, new_value: dict[Field,Any]):
-        raise NotImplementedError("Cannot directly set extended_data value")
+        raise NotImplementedError("Cannot directly set extended_data value.")
         return # TODO implement this
 
     @property
     def to_dict(self) -> dict[Field,Any]:
+        """Creates dict of header fields as format field: field_value"""
         fields = self.__bool_fields | self.__datetime_fields
         fields = fields | self.__int_fields | self.__str_fields
         fields[Field.EXTENDED_DATA] = self.__extended_data_fields
@@ -346,35 +361,47 @@ class VDIFHeader:
         if field not in Field.primary_values(): # an assignable field
             raise ValueError("_try_set_field cannot assign value to field " \
                 f"{field.value}.")
-        if type(new_value) != field.underlying_type: # correct type of value
-            raise ValueError("_try_set_field cannot assign value of type " \
-                f"{type(new_value)} to field of type {field.underlying_type}.")         
+        if type(new_value) != field.data_type: # correct type of value
+            raise TypeError("_try_set_field cannot assign value of type " \
+                f"{type(new_value)} to field of type {field.data_type}.")         
         raw_value = switch_end(field._encoder(new_value))
         if len(raw_value) > field._bit_length: # fits within bit space
             raise ValueError(f"Cannot assign value {new_value} to field " \
                 f"{field.value} with maximum bit length {field._bit_length}.")
-        raw_value = format(raw_value, f"0{field._bit_length}b")
+        raw_value = raw_value.ljust(field._bit_length, "0")
         # otherwise, value is good
-        if field.underlying_type == bool:      
+        if field.data_type == bool:      
             self.__bool_fields[field] = new_value
-        elif field.underlying_type == datetime: 
+        elif field.data_type == datetime: 
             self.__datetime_fields[field] = new_value
-        elif field.underlying_type == int: 
+        elif field.data_type == int: 
             if new_value < 0:
                 raise ValueError(f"Cannot negative value {new_value} to " \
                     f"field {field.value}.")
             self.__int_fields[field] = new_value
-        elif field.underlying_type == str: 
+        elif field.data_type == str: 
             self.__str_fields[field] = new_value
         # only get here if haven't errored in assignment of incorrect type
         self.__raw_values[field] = raw_value
         return
 
+    def _get_value(self, field: Field):
+        if field.data_type == bool:      
+            return self.__bool_fields.get(field, None)
+        elif field.data_type == datetime: 
+            return self.__datetime_fields.get(field, None)
+        elif field.data_type == int: 
+            return self.__int_fields.get(field, None)
+        elif field.data_type == str: 
+            return self.__str_fields.get(field, None)
+        elif field == Field.EXTENDED_DATA:
+            return self.__extended_data_fields
+
     def _get_raw_value(self, field: Field):
         return self.__raw_values.get(field, None)
 
     def __interpret_extended_data(self):
-        raw_value = self.__raw_values[Field.EXTENDED_DATA]
+        raw_value = switch_end(self.__raw_values[Field.EXTENDED_DATA])
         edv = self.extended_data_version
         extended_data = Field.EXTENDED_DATA._decoder((raw_value, edv))
         self.__extended_data_fields = extended_data

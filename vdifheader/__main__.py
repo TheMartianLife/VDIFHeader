@@ -1,5 +1,5 @@
 # > vdifheader - __main__.py
-# Defines argument parser and main functions for package run in script mode
+# Defines argument parser and main methods for package run in script mode
 
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -13,7 +13,7 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 """
 > vdifheader - __main__.py (private)
-Defines argument parser and main functions for package run in script mode
+Defines argument parser and main methods for package run in script mode
 """
 __author__ = "Mars Buttfield-Addison"
 __authors__ = [__author__]
@@ -169,101 +169,3 @@ def __check_input_filepath_arg(parser, arg):
 
 if __name__ == "__main__":
     main()
-
-
-
-# def __parse_args(args: list[str]) -> dict[str, Union[int, str, _VDIFPrintMode]]:
-    # """Parses and validates args and flags, setting defaults where needed"""
-    # parsed_args = {  # default values
-    #     "num_headers": -1,
-    #     "print_mode": _VDIFPrintMode.SUMMARY,
-    #     "invalid": [],
-    # }
-    # value_field = ""
-    # # TODO test and support stringed args and stringed/escaped filepath args
-    # for arg in args:
-    #     if arg == "-h" or args == "--help":
-    #         parsed_args["show_help"] = True
-    #         return parsed_args
-    #     elif arg == "-n" or arg == "--count":
-    #         value_field = "num_headers"
-    #     elif arg == "-a" or arg == "--all":
-    #         parsed_args["num_headers"] = -1  # (treated as 'all' value)
-    #     elif arg == "-v" or arg == "--verbose":
-    #         parsed_args["print_mode"] = _VDIFPrintMode.VERBOSE
-    #     elif arg == "-s" or arg == "--silent":
-    #         parsed_args["print_mode"] = _VDIFPrintMode.NONE
-    #     elif arg == "-p" or arg == "--print":
-    #         value_field = "print_mode"
-    #     elif value_field == "num_headers":
-    #         try:
-    #             num_headers = int(arg)
-    #         except ValueError:
-    #             parsed_args["invalid"].append(f"-n {arg}")
-    #             stderr.write(f"WARNING: arg {arg} invalid for num_headers. " \
-    #                 "Defaulting to all.\n")
-    #             num_headers = -1
-    #         parsed_args["num_headers"] = num_headers
-    #         value_field = ""
-    #     elif value_field == "print_mode":
-    #         try:
-    #             print_mode = _VDIFPrintMode[arg.upper()]
-    #         except KeyError:
-    #             parsed_args["invalid"].append(f"-p {arg}")
-    #             stderr.write(f"WARNING: arg '{arg}' invalid for print_mode. " \
-    #                 "Defaulting to 'summary'.\n")
-    #             print_mode = _VDIFPrintMode.SUMMARY
-    #         parsed_args["print_mode"] = print_mode
-    #         value_field = ""
-    #     elif arg == args[-1] and value_field == "":
-    #         parsed_args["input_filepath"] = arg
-    #     else:
-    #         parsed_args["invalid"].append(arg)
-    #         stderr.write(f"WARNING: arg {arg} is invalid arg for position. " \
-    #             "Ignoring arg.\n")
-    # # if we get to here without a valid input_filepath
-    # if not "input_filepath" in parsed_args:
-    #     stderr.write(f"ERROR: no input_filepath provided.\n")
-    # elif not path.isfile(parsed_args["input_filepath"]):
-    #     stderr.write(f"ERROR: {parsed_args['input_filepath']} is not a " \
-    #         "file.\n")
-    #     del parsed_args["input_filepath"] # invalid is as good as none
-    # return parsed_args
-
-
-# def __print_header_output(header: VDIFHeader, print_mode: _VDIFPrintMode):
-#     """Prints the specified level of output information about given header"""
-#     # if print_mode == _VDIFPrintMode.SUMMARY:
-#     #     header.print_summary()
-#     # el
-#     if print_mode == _VDIFPrintMode.VALUES:
-#         header.print_values()
-#         stdout.write("\n")
-#     elif print_mode == _VDIFPrintMode.RAW:
-#         header.print_raw()
-#         stdout.write("\n")
-#     elif print_mode == _VDIFPrintMode.VERBOSE:
-#         header.print_verbose()
-#         stdout.write("\n")
-#     return
-
-
-# def __show_usage():
-#     """Shows one-line usage information"""
-#     stdout.write("usage: vdifheader [options] [file]\n")
-#     return
-
-
-# def __show_help():
-#     """Shows a nicely styled manpage-like description of valid args and flags"""
-#     __show_usage() # show usage line first
-#     stdout.write("  options:\n")
-#     stdout.write("    -h, --help\t\tshow help\n")
-#     stdout.write("    -n --count [arg]\tnumber of headers to parse " \
-#         "(default=1)\n")
-#     stdout.write("    -a --all\t\tparse all headers in file\n")
-#     stdout.write("    -v --verbose\tshow all output\n")
-#     stdout.write("    -s --silent\t\tshow minimal output\n")
-#     stdout.write("    -p --print [arg]\tlevel of output to show" \
-#         "{none|summary|values|raw|verbose} (default=summary)\n")
-#     return
