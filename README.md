@@ -31,7 +31,6 @@ When imported as a package, users have access to two main methods:
 
 ```python
 import vdifheader as vh
-from vdifheader import Validity
 
 input_filepath = './some_input_file.vdif'
 
